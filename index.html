@@ -72,22 +72,22 @@
                             <label for="input-valor-carta">Valor da Carta de Crédito</label>
                             <div class="input-wrapper currency">
                                 <span class="input-prefix">R$</span>
-                                <input type="text" id="input-valor-carta" value="100.000,00" inputmode="decimal" autocomplete="off">
+                                <input type="text" id="input-valor-carta" value="" placeholder="0,00" inputmode="decimal" autocomplete="off">
                             </div>
                         </div>
                         <div class="input-group">
                             <label for="input-prazo">Prazo (meses)</label>
                             <div class="input-wrapper">
-                                <input type="number" id="input-prazo" value="200" min="12" max="240" step="1">
+                                <input type="number" id="input-prazo" value="" placeholder="200" min="12" max="240" step="1">
                                 <span class="input-suffix">meses</span>
                             </div>
-                            <input type="range" id="slider-prazo" min="12" max="240" value="200" class="range-slider">
+                            <input type="range" id="slider-prazo" min="12" max="240" value="12" class="range-slider">
                         </div>
                         <div class="input-row">
                     <div class="input-group">
                         <label for="input-taxa-admin">Taxa de Administração (%)</label>
                         <div class="input-wrapper percent">
-                            <input type="number" id="input-taxa-admin" value="15" step="0.1">
+                            <input type="number" id="input-taxa-admin" value="" placeholder="15" step="0.1">
                             <span class="input-suffix">%</span>
                         </div>
                     </div>
@@ -95,7 +95,7 @@
                     <div class="input-group">
                         <label for="input-fundo-reserva">Fundo de Reserva (%)</label>
                         <div class="input-wrapper percent">
-                            <input type="number" id="input-fundo-reserva" value="3" step="0.1">
+                            <input type="number" id="input-fundo-reserva" value="" placeholder="3" step="0.1">
                             <span class="input-suffix">%</span>
                         </div>
                     </div>
@@ -103,17 +103,17 @@
                     <div class="input-group">
                         <label for="input-taxa-correcao">Correção Anual (ex: INCC)</label>
                         <div class="input-wrapper percent">
-                            <input type="number" id="input-taxa-correcao" value="0" step="0.1" min="0">
+                            <input type="number" id="input-taxa-correcao" value="" placeholder="0" step="0.1" min="0">
                             <span class="input-suffix">% a.a.</span>
                         </div>
                     </div>                             </div>
                         <!-- Resultado Parcela Básica -->
                         <div class="result-highlight" id="resultado-parcela-basica">
                             <div class="result-label" id="label-parcela-basica">Parcela Mensal Padrão</div>
-                            <div class="result-value" id="valor-parcela-basica">R$ 590,00</div>
+                            <div class="result-value" id="valor-parcela-basica">R$ 0,00</div>
                             <div class="result-sub-value" id="ultima-parcela-basica" style="font-size: 0.85rem; opacity: 0.8; display: none;">Última est.: R$ 590,00</div>
                             <div class="result-detail" id="detalhe-parcela-basica">
-                                Carta R$ 500,00 + Admin R$ 75,00 + Reserva R$ 15,00
+                                Preencha os dados para simular
                             </div>
                         </div>
                     </div>
@@ -132,7 +132,7 @@
                             <label for="input-lance-proprio">Lance com Recursos Próprios</label>
                             <div class="input-wrapper currency">
                                 <span class="input-prefix">R$</span>
-                                <input type="text" id="input-lance-proprio" value="10.000,00" inputmode="decimal" autocomplete="off">
+                                <input type="text" id="input-lance-proprio" value="" placeholder="0,00" inputmode="decimal" autocomplete="off">
                             </div>
                             <div class="lance-percentage" id="pct-lance-proprio">10% da carta</div>
                         </div>
@@ -141,7 +141,7 @@
                             <label for="input-lance-embutido">Lance Embutido (Descontado da carta)</label>
                             <div class="input-wrapper currency">
                                 <span class="input-prefix">R$</span>
-                                <input type="text" id="input-lance-embutido" value="20.000,00" inputmode="decimal" autocomplete="off">
+                                <input type="text" id="input-lance-embutido" value="" placeholder="0,00" inputmode="decimal" autocomplete="off">
                             </div>
                             <div class="lance-percentage" id="pct-lance-embutido">20% da carta</div>
                         </div>
@@ -274,7 +274,7 @@
                         <div class="input-group">
                             <label for="input-taxa-juros-main">Taxa de Juros (ao ano)</label>
                             <div class="input-wrapper">
-                                <input type="number" id="input-taxa-juros-main" value="12" min="0" max="40" step="0.1">
+                                <input type="number" id="input-taxa-juros-main" value="" placeholder="12" min="0" max="40" step="0.1">
                                 <span class="input-suffix">% a.a.</span>
                             </div>
                             <div class="lance-percentage" id="taxa-mensal-main">Equivalente a 0,95% ao mês</div>
@@ -282,17 +282,17 @@
                         <div class="input-group">
                             <label for="input-taxa-tr-main">Taxa TR (ao ano)</label>
                             <div class="input-wrapper">
-                                <input type="number" id="input-taxa-tr-main" value="0" min="0" max="20" step="0.1">
+                                <input type="number" id="input-taxa-tr-main" value="" placeholder="0" min="0" max="20" step="0.1">
                                 <span class="input-suffix">% a.a.</span>
                             </div>
                         </div>
                         <div class="input-group">
                             <label for="input-prazo-fin">Prazo do Financiamento</label>
                             <div class="input-wrapper">
-                                <input type="number" id="input-prazo-fin" value="360" min="12" max="420" step="1">
+                                <input type="number" id="input-prazo-fin" value="" placeholder="360" min="12" max="420" step="1">
                                 <span class="input-suffix">meses</span>
                             </div>
-                            <input type="range" id="slider-prazo-fin" min="12" max="420" value="360" class="range-slider">
+                            <input type="range" id="slider-prazo-fin" min="12" max="420" value="12" class="range-slider">
                         </div>
                         <div class="toggle-group">
                             <label class="toggle-label">Sistema de Amortização</label>
@@ -358,7 +358,7 @@
                         <div class="input-group">
                             <label for="input-taxa-juros">Taxa de Juros (ao ano)</label>
                             <div class="input-wrapper">
-                                <input type="number" id="input-taxa-juros" value="12" min="0" max="40" step="0.1">
+                                <input type="number" id="input-taxa-juros" value="" placeholder="12" min="0" max="40" step="0.1">
                                 <span class="input-suffix">% a.a.</span>
                             </div>
                             <div class="lance-percentage" id="taxa-mensal-equivalente">Equivalente a 0,95% ao mês</div>
@@ -366,14 +366,14 @@
                         <div class="input-group">
                             <label for="input-taxa-tr">Taxa TR (ao ano)</label>
                             <div class="input-wrapper">
-                                <input type="number" id="input-taxa-tr" value="0" min="0" max="20" step="0.1">
+                                <input type="number" id="input-taxa-tr" value="" placeholder="0" min="0" max="20" step="0.1">
                                 <span class="input-suffix">% a.a.</span>
                             </div>
                         </div>
                         <div class="input-group">
                             <label for="input-prazo-fin-comp">Prazo do Financiamento</label>
                             <div class="input-wrapper">
-                                <input type="number" id="input-prazo-fin-comp" value="360" min="12" max="420" step="1">
+                                <input type="number" id="input-prazo-fin-comp" value="" placeholder="360" min="12" max="420" step="1">
                                 <span class="input-suffix">meses</span>
                             </div>
                         </div>
@@ -381,7 +381,7 @@
                             <label for="input-entrada-fin">Entrada (valor do lance)</label>
                             <div class="input-wrapper currency">
                                 <span class="input-prefix">R$</span>
-                                <input type="text" id="input-entrada-fin" value="30.000,00" readonly>
+                                <input type="text" id="input-entrada-fin" value="" readonly>
                             </div>
                             <div class="lance-percentage">Sincronizado com o valor do lance</div>
                         </div>

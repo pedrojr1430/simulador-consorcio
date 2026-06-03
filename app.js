@@ -11,17 +11,17 @@
 
     // ── Estado da Aplicação ────────────────────────────────────
     const state = {
-        valorCarta: 100000,
-        prazo: 200,
-        taxaAdmin: 15,
-        fundoReserva: 3,
+        valorCarta: 0,
+        prazo: 0,
+        taxaAdmin: 0,
+        fundoReserva: 0,
         taxaCorrecao: 0,
-        lanceProprio: 10000,
-        lanceEmbutido: 20000,
+        lanceProprio: 0,
+        lanceEmbutido: 0,
         abatimento: 'parcela',
-        taxaJuros: 12,
+        taxaJuros: 0,
         taxaTR: 0,
-        prazoFinanciamento: 360,
+        prazoFinanciamento: 0,
         sistemaAmortizacao: 'price'
     };
     
