@@ -59,29 +59,77 @@
     const elToggleAmortizacao = $('#toggle-amortizacao');
     const elToggleAmortizacaoMain = $('#toggle-amortizacao-main');
 
-    // ── Formatação de Inputs Monetários ────────────────────────
+    // ── Formatação de Inputs Monetários (tempo real) ────────────
+    function formatarEmTempoReal(valor) {
+        // Recebe string "limpa" de dígitos, retorna "100.000,00"
+        let nums = valor.replace(/\D/g, ''); // só dígitos
+        if (nums === '') return '';
+        // Tratar como centavos: últimos 2 dígitos são decimais
+        nums = nums.replace(/^0+/, '') || '0'; // remove zeros à esquerda
+        while (nums.length < 3) nums = '0' + nums; // garantir pelo menos 0,0X
+        const inteiro = nums.slice(0, -2);
+        const decimal = nums.slice(-2);
+        // Adicionar pontos de milhar
+        const comPontos = inteiro.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        return comPontos + ',' + decimal;
+    }
+
     function setupCurrencyInput(input, stateKey) {
         if (!input) return;
-        input.addEventListener('focus', function () {
-            const val = Calculator.parseMoeda(this.value);
-            if (val === 0) this.value = '';
-        });
 
-        input.addEventListener('blur', function () {
-            const val = Calculator.parseMoeda(this.value);
-            state[stateKey] = val;
-            this.value = Calculator.formatarInputMoeda(val);
+        input.addEventListener('input', function () {
+            const formatted = formatarEmTempoReal(this.value);
+            // Salvar posição do cursor
+            this.value = formatted;
+            // Atualizar state
+            state[stateKey] = Calculator.parseMoeda(formatted);
             recalcular();
         });
 
-        input.addEventListener('input', function () {
-            // Allow typing freely — parse on blur
+        input.addEventListener('focus', function () {
+            if (Calculator.parseMoeda(this.value) === 0) this.value = '';
+        });
+
+        input.addEventListener('blur', function () {
+            if (this.value === '' || Calculator.parseMoeda(this.value) === 0) {
+                this.value = '';
+                state[stateKey] = 0;
+            }
         });
 
         input.addEventListener('keydown', function (e) {
-            if (e.key === 'Enter') {
-                this.blur();
+            if (e.key === 'Enter') this.blur();
+        });
+    }
+
+    // ── Modos de Lance (R$ / %) ───────────────────────────────
+    const lanceModes = { lanceProprio: 'valor', lanceEmbutido: 'valor' };
+
+    function setupLanceModeToggle(toggleId, inputId, prefixId, stateKey) {
+        const toggle = $(toggleId);
+        if (!toggle) return;
+
+        toggle.addEventListener('click', function (e) {
+            const btn = e.target.closest('.lance-mode-btn');
+            if (!btn) return;
+            toggle.querySelectorAll('.lance-mode-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            const mode = btn.dataset.mode;
+            lanceModes[stateKey] = mode;
+            const prefix = $(prefixId);
+            const input = $(inputId);
+
+            if (mode === 'pct') {
+                if (prefix) prefix.textContent = '%';
+                if (input) { input.value = ''; input.placeholder = '0'; input.type = 'number'; input.step = '0.1'; input.min = '0'; input.max = '100'; }
+            } else {
+                if (prefix) prefix.textContent = 'R$';
+                if (input) { input.value = ''; input.placeholder = '0,00'; input.type = 'text'; input.removeAttribute('step'); input.removeAttribute('min'); input.removeAttribute('max'); }
             }
+
+            state[stateKey] = 0;
+            recalcular();
         });
     }
 
@@ -162,7 +210,15 @@
 
     // ── Motor de Recálculo Reativo ─────────────────────────────
     function recalcular() {
-        const { valorCarta, prazo, taxaAdmin, fundoReserva, taxaCorrecao, lanceProprio, lanceEmbutido, abatimento, taxaJuros, prazoFinanciamento, sistemaAmortizacao } = state;
+        let { valorCarta, prazo, taxaAdmin, fundoReserva, taxaCorrecao, lanceProprio, lanceEmbutido, abatimento, taxaJuros, prazoFinanciamento, sistemaAmortizacao } = state;
+
+        // Converter % para R$ se modo percentual ativo
+        if (lanceModes.lanceProprio === 'pct' && valorCarta > 0) {
+            lanceProprio = valorCarta * (lanceProprio / 100);
+        }
+        if (lanceModes.lanceEmbutido === 'pct' && valorCarta > 0) {
+            lanceEmbutido = valorCarta * (lanceEmbutido / 100);
+        }
 
         // 1. Parcela Básica
         const basica = Calculator.parcelaBasicaConsorcio(valorCarta, taxaAdmin, fundoReserva, prazo, taxaCorrecao);
@@ -696,6 +752,23 @@
         setupCurrencyInput(elValorCarta, 'valorCarta');
         setupCurrencyInput(elValorLanceProprio, 'lanceProprio');
         setupCurrencyInput(elValorLanceEmbutido, 'lanceEmbutido');
+
+        // Lance mode toggles (R$ / %)
+        setupLanceModeToggle('#toggle-modo-lance-proprio', '#input-lance-proprio', '#prefix-lance-proprio', 'lanceProprio');
+        setupLanceModeToggle('#toggle-modo-lance-embutido', '#input-lance-embutido', '#prefix-lance-embutido', 'lanceEmbutido');
+
+        // Quando em modo %, os inputs de lance viram type=number — precisam de handler numérico
+        // O setupCurrencyInput já lida com type=text. Para %, adicionamos listener extra:
+        [elValorLanceProprio, elValorLanceEmbutido].forEach((el, i) => {
+            if (!el) return;
+            const key = i === 0 ? 'lanceProprio' : 'lanceEmbutido';
+            el.addEventListener('input', function () {
+                if (lanceModes[key] === 'pct') {
+                    state[key] = parseFloat(this.value) || 0;
+                    recalcular();
+                }
+            });
+        });
 
         // Setup numeric inputs — Consórcio
         setupNumericInput(elPrazo, 'prazo');

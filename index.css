@@ -279,6 +279,24 @@ body.dark-mode .icon-moon { display: none; }
 .lance-percentage { font-size: 0.78rem; color: var(--emerald); font-weight: 500; }
 .total-lance-box { font-size: 0.8rem; color: var(--blue); font-weight: 600; padding: 8px 12px; background: var(--blue-soft); border-radius: var(--radius-sm); border: 1px solid rgba(59, 130, 246, 0.2); text-align: center; }
 
+/* Placeholder */
+.input-wrapper input::placeholder { color: var(--text-muted); opacity: 0.45; font-weight: 400; }
+.dark-mode .input-wrapper input::placeholder { color: rgba(255,255,255,0.3); }
+
+/* Lance mode toggle (R$ / %) */
+.lance-mode-toggle {
+    display: flex; gap: 2px; background: var(--overlay-light); border: 1px solid var(--border-card);
+    border-radius: var(--radius-sm); padding: 2px; margin-bottom: 4px;
+}
+.lance-mode-btn {
+    flex: 1; padding: 4px 10px; border: none; border-radius: calc(var(--radius-sm) - 2px);
+    font-size: 0.75rem; font-weight: 600; cursor: pointer; transition: var(--transition-fast);
+    background: transparent; color: var(--text-secondary); font-family: var(--font);
+}
+.lance-mode-btn.active {
+    background: var(--emerald); color: #fff; box-shadow: 0 2px 8px rgba(16,185,129,0.3);
+}
+
 .toggle-group { display: flex; flex-direction: column; gap: var(--space-sm); }
 .toggle-label { font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
 .toggle-options {
