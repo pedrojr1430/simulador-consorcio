@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Simulador de Consórcio Avançado - Compare consórcio vs financiamento, simule lances, calcule parcelas e economize. Ferramenta completa para planejamento financeiro.">
+    <meta name="keywords" content="simulador consórcio, simulação lance, comparar financiamento, taxa administração, fundo reserva">
+    <title>Consórcio Pro — Simulador Avançado de Consórcios</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="index.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="bg-orbs">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <!-- Header -->
+    <header id="main-header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/>
+                        <path d="M12 18V6"/>
+                    </svg>
+                </div>
+                <span class="logo-text">Consórcio<span class="logo-accent">Pro</span></span>
+            </div>
+            <nav class="header-nav">
+                <button id="theme-toggle" class="theme-toggle-btn" aria-label="Alternar Tema">
+                    <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                    <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="4.22" x2="19.78" y2="5.64"/></svg>
+                </button>
+                <a href="#simulador" class="nav-link active" data-section="simulador">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6M9 13h6M9 17h4"/></svg>
+                    Simulador
+                </a>
+                <a href="#dashboard" class="nav-link" data-section="dashboard">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/><circle cx="12" cy="12" r="3"/></svg>
+                    Relatório Completo
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <main id="app-main">
+        <!-- ==================== SECTION: SIMULADOR ==================== -->
+        <section id="simulador" class="section active-section">
+            <div class="section-header">
+                <h1>Simulador de Consórcio</h1>
+                <p class="section-subtitle">Configure os parâmetros e veja os resultados em tempo real</p>
+            </div>
+
+            <div class="simulator-grid">
+                <!-- Card: Dados do Consórcio -->
+                <div class="glass-card card-consortium" id="card-consortium">
+                    <div class="card-header">
+                        <div class="card-icon blue">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+                        </div>
+                        <h2>Dados do Consórcio</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="input-group">
+                            <label for="input-valor-carta">Valor da Carta de Crédito</label>
+                            <div class="input-wrapper currency">
+                                <span class="input-prefix">R$</span>
+                                <input type="text" id="input-valor-carta" value="100.000,00" inputmode="decimal" autocomplete="off">
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label for="input-prazo">Prazo (meses)</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="input-prazo" value="200" min="12" max="240" step="1">
+                                <span class="input-suffix">meses</span>
+                            </div>
+                            <input type="range" id="slider-prazo" min="12" max="240" value="200" class="range-slider">
+                        </div>
+                        <div class="input-row">
+                    <div class="input-group">
+                        <label for="input-taxa-admin">Taxa de Administração (%)</label>
+                        <div class="input-wrapper percent">
+                            <input type="number" id="input-taxa-admin" value="15" step="0.1">
+                            <span class="input-suffix">%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="input-fundo-reserva">Fundo de Reserva (%)</label>
+                        <div class="input-wrapper percent">
+                            <input type="number" id="input-fundo-reserva" value="3" step="0.1">
+                            <span class="input-suffix">%</span>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="input-taxa-correcao">Correção Anual (ex: INCC)</label>
+                        <div class="input-wrapper percent">
+                            <input type="number" id="input-taxa-correcao" value="0" step="0.1" min="0">
+                            <span class="input-suffix">% a.a.</span>
+                        </div>
+                    </div>                             </div>
+                        <!-- Resultado Parcela Básica -->
+                        <div class="result-highlight" id="resultado-parcela-basica">
+                            <div class="result-label" id="label-parcela-basica">Parcela Mensal Padrão</div>
+                            <div class="result-value" id="valor-parcela-basica">R$ 590,00</div>
+                            <div class="result-sub-value" id="ultima-parcela-basica" style="font-size: 0.85rem; opacity: 0.8; display: none;">Última est.: R$ 590,00</div>
+                            <div class="result-detail" id="detalhe-parcela-basica">
+                                Carta R$ 500,00 + Admin R$ 75,00 + Reserva R$ 15,00
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card: Simulação de Lance -->
+                <div class="glass-card card-lance" id="card-lance">
+                    <div class="card-header">
+                        <div class="card-icon emerald">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                        </div>
+                        <h2>Simulação de Lance</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="input-group">
+                            <label for="input-lance-proprio">Lance com Recursos Próprios</label>
+                            <div class="input-wrapper currency">
+                                <span class="input-prefix">R$</span>
+                                <input type="text" id="input-lance-proprio" value="10.000,00" inputmode="decimal" autocomplete="off">
+                            </div>
+                            <div class="lance-percentage" id="pct-lance-proprio">10% da carta</div>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="input-lance-embutido">Lance Embutido (Descontado da carta)</label>
+                            <div class="input-wrapper currency">
+                                <span class="input-prefix">R$</span>
+                                <input type="text" id="input-lance-embutido" value="20.000,00" inputmode="decimal" autocomplete="off">
+                            </div>
+                            <div class="lance-percentage" id="pct-lance-embutido">20% da carta</div>
+                        </div>
+
+                        <div class="total-lance-box" id="info-total-lance">
+                            Total Ofertado: R$ 30.000,00 (30% da carta)
+                        </div>
+
+                        <div class="toggle-group">
+                            <label class="toggle-label">Abatimento Pós-Lance</label>
+                            <div class="toggle-options" id="toggle-abatimento">
+                                <button class="toggle-btn active" data-value="parcela" id="btn-reduz-parcela">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+                                    Reduzir Parcela
+                                </button>
+                                <button class="toggle-btn" data-value="prazo" id="btn-reduz-prazo">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                                    Reduzir Prazo
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Resultados Pós-Lance -->
+                        <div class="lance-results" id="lance-results">
+                            <div class="lance-result-row">
+                                <div class="result-card mini green">
+                                    <div class="label" id="label-nova-parcela">Novo Valor da Parcela</div>
+                                    <div class="value" id="nova-parcela">R$ 490,00</div>
+                                    <div class="sub-value" id="ultima-parcela-consorcio" style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px; display: none;">Última est.: R$ 490,00</div>
+                                </div>
+                                <div class="result-card mini blue">
+                                    <span class="mini-label">Novo Prazo</span>
+                                    <span class="mini-value" id="novo-prazo">200 meses</span>
+                                </div>
+                            </div>
+                            <div class="lance-result-row">
+                                <div class="result-card mini gold">
+                                    <span class="mini-label">Economia na Parcela</span>
+                                    <span class="mini-value" id="economia-parcela">- R$ 177,00</span>
+                                </div>
+                                <div class="result-card mini purple">
+                                    <span class="mini-label">Total Pago (Consórcio)</span>
+                                    <span class="mini-value" id="total-pago-consorcio">R$ 112.600,00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card: Resumo Visual Rápido -->
+                <div class="glass-card card-resumo-rapido" id="card-resumo-rapido">
+                    <div class="card-header">
+                        <div class="card-icon gold">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                        </div>
+                        <h2>Visão Geral</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="overview-metric">
+                            <div class="metric-header">
+                                <span class="metric-label">Valor da Carta</span>
+                                <span class="metric-value" id="overview-carta">R$ 100.000,00</span>
+                            </div>
+                        </div>
+                        <div class="overview-metric">
+                            <div class="metric-header">
+                                <span class="metric-label">Lance Oferecido</span>
+                                <span class="metric-value accent" id="overview-lance">R$ 30.000,00</span>
+                            </div>
+                            <div class="metric-bar">
+                                <div class="metric-bar-fill emerald" id="bar-lance" style="width: 30%"></div>
+                            </div>
+                        </div>
+                        <div class="overview-metric">
+                            <div class="metric-header">
+                                <span class="metric-label">Saldo Devedor Após Lance</span>
+                                <span class="metric-value" id="overview-saldo">R$ 82.600,00</span>
+                            </div>
+                            <div class="metric-bar">
+                                <div class="metric-bar-fill blue" id="bar-saldo" style="width: 70%"></div>
+                            </div>
+                        </div>
+                        <div class="overview-metric">
+                            <div class="metric-header">
+                                <span class="metric-label">Total a Desembolsar</span>
+                                <span class="metric-value" id="overview-total">R$ 112.600,00</span>
+                            </div>
+                        </div>
+                         <div class="overview-metric">
+                            <div class="metric-header">
+                                <span class="metric-label">Custo Efetivo Total (%)</span>
+                                <span class="metric-value gold" id="overview-cet">18,00%</span>
+                            </div>
+                        </div>
+
+                        <div class="divider"></div>
+
+                        <div class="timeline-mini">
+                            <h3>Cronograma de Pagamento</h3>
+                            <div class="timeline-bar-container">
+                                <div class="timeline-bar">
+                                    <div class="timeline-lance-segment" id="timeline-lance-seg"></div>
+                                    <div class="timeline-parcela-segment" id="timeline-parcela-seg"></div>
+                                </div>
+                                <div class="timeline-labels">
+                                    <span>Mês 1</span>
+                                    <span id="timeline-end-label">Mês 200</span>
+                                </div>
+                            </div>
+                            <div class="timeline-legend">
+                                <span class="legend-item"><span class="legend-dot emerald"></span> Lance</span>
+                                <span class="legend-item"><span class="legend-dot blue"></span> Parcelas</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção: Financiamento Rápido + Gráfico Dinâmico -->
+            <div class="simulator-bottom-grid">
+                <!-- Card: Financiamento -->
+                <div class="glass-card card-fin-rapido" id="card-fin-rapido">
+                    <div class="card-header">
+                        <div class="card-icon red">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11M20 10v11M8 14v3M12 14v3M16 14v3"/></svg>
+                        </div>
+                        <h2>Comparar com Financiamento</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="input-group">
+                            <label for="input-taxa-juros-main">Taxa de Juros (ao ano)</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="input-taxa-juros-main" value="12" min="0" max="40" step="0.1">
+                                <span class="input-suffix">% a.a.</span>
+                            </div>
+                            <div class="lance-percentage" id="taxa-mensal-main">Equivalente a 0,95% ao mês</div>
+                        </div>
+                        <div class="input-group">
+                            <label for="input-taxa-tr-main">Taxa TR (ao ano)</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="input-taxa-tr-main" value="0" min="0" max="20" step="0.1">
+                                <span class="input-suffix">% a.a.</span>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label for="input-prazo-fin">Prazo do Financiamento</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="input-prazo-fin" value="360" min="12" max="420" step="1">
+                                <span class="input-suffix">meses</span>
+                            </div>
+                            <input type="range" id="slider-prazo-fin" min="12" max="420" value="360" class="range-slider">
+                        </div>
+                        <div class="toggle-group">
+                            <label class="toggle-label">Sistema de Amortização</label>
+                            <div class="toggle-options" id="toggle-amortizacao-main">
+                                <button class="toggle-btn active" data-value="price">Price</button>
+                                <button class="toggle-btn" data-value="sac">SAC</button>
+                            </div>
+                        </div>
+                        <div class="result-highlight financiamento">
+                            <div class="result-label">Parcela do Financiamento</div>
+                            <div class="result-value" id="parcela-fin-main">R$ 0,00</div>
+                            <div class="result-detail" id="detalhe-fin-main">Price | Financiado: R$ 0,00</div>
+                        </div>
+                        <div class="verdict-box" id="verdict-box-main">
+                            <div class="verdict-icon" id="verdict-icon-main">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></svg>
+                            </div>
+                            <div class="verdict-text">
+                                <span class="verdict-title" id="verdict-title-main">Calculando...</span>
+                                <span class="verdict-detail" id="verdict-detail-main"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Card: Gráfico Dinâmico -->
+                <div class="glass-card card-chart card-chart-main" id="card-chart-main">
+                    <div class="card-header">
+                        <div class="card-icon purple">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                        </div>
+                        <h2>Evolução das Parcelas</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container" id="chart-main-container">
+                            <canvas id="canvas-evolucao-main"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== SECTION: DASHBOARD (Comparador + Relatório) ==================== -->
+        <section id="dashboard" class="section">
+            <div class="section-header" style="display: flex; flex-direction: column; align-items: center; position: relative;">
+                <h2>Relatório Completo</h2>
+                <p class="section-subtitle">Comparativo detalhado e visão consolidada da sua simulação</p>
+                <button id="btn-export-pdf" style="margin-top: 15px; background: var(--blue); color: white; border: none; padding: 10px 20px; border-radius: var(--radius-md); font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.9rem; transition: opacity 0.2s;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Exportar Relatório PDF
+                </button>
+            </div>
+
+            <div class="comparador-grid">
+                <!-- Financiamento Inputs -->
+                <div class="glass-card card-financiamento" id="card-financiamento">
+                    <div class="card-header">
+                        <div class="card-icon red">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11M20 10v11M8 14v3M12 14v3M16 14v3"/></svg>
+                        </div>
+                        <h2>Dados do Financiamento</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="input-group">
+                            <label for="input-taxa-juros">Taxa de Juros (ao ano)</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="input-taxa-juros" value="12" min="0" max="40" step="0.1">
+                                <span class="input-suffix">% a.a.</span>
+                            </div>
+                            <div class="lance-percentage" id="taxa-mensal-equivalente">Equivalente a 0,95% ao mês</div>
+                        </div>
+                        <div class="input-group">
+                            <label for="input-taxa-tr">Taxa TR (ao ano)</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="input-taxa-tr" value="0" min="0" max="20" step="0.1">
+                                <span class="input-suffix">% a.a.</span>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label for="input-prazo-fin-comp">Prazo do Financiamento</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="input-prazo-fin-comp" value="360" min="12" max="420" step="1">
+                                <span class="input-suffix">meses</span>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label for="input-entrada-fin">Entrada (valor do lance)</label>
+                            <div class="input-wrapper currency">
+                                <span class="input-prefix">R$</span>
+                                <input type="text" id="input-entrada-fin" value="30.000,00" readonly>
+                            </div>
+                            <div class="lance-percentage">Sincronizado com o valor do lance</div>
+                        </div>
+                        <div class="toggle-group">
+                            <label class="toggle-label">Sistema de Amortização</label>
+                            <div class="toggle-options" id="toggle-amortizacao">
+                                <button class="toggle-btn active" data-value="price" id="btn-price">Tabela Price</button>
+                                <button class="toggle-btn" data-value="sac" id="btn-sac">Tabela SAC</button>
+                            </div>
+                        </div>
+
+                        <div class="result-highlight financiamento">
+                            <div class="result-label">Parcela do Financiamento</div>
+                            <div class="result-value" id="parcela-financiamento">R$ 0,00</div>
+                            <div class="result-detail" id="detalhe-financiamento">
+                                Primeira parcela (Price) | Valor financiado: R$ 70.000,00
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Comparação Visual -->
+                <div class="glass-card card-comparacao" id="card-comparacao">
+                    <div class="card-header">
+                        <div class="card-icon purple">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+                        </div>
+                        <h2>Análise Comparativa</h2>
+                    </div>
+                    <div class="card-body">
+                        <!-- Barras de Comparação -->
+                        <div class="comparison-bars">
+                            <div class="comparison-item">
+                                <div class="comparison-label-row">
+                                    <span class="comp-label">Custo Total — Consórcio</span>
+                                    <span class="comp-value blue" id="comp-total-consorcio">R$ 112.600,00</span>
+                                </div>
+                                <div class="comparison-bar">
+                                    <div class="comp-bar-fill blue" id="compbar-consorcio" style="width: 50%"></div>
+                                </div>
+                            </div>
+                            <div class="comparison-item">
+                                <div class="comparison-label-row">
+                                    <span class="comp-label">Custo Total — Financiamento</span>
+                                    <span class="comp-value red" id="comp-total-financiamento">R$ 0,00</span>
+                                </div>
+                                <div class="comparison-bar">
+                                    <div class="comp-bar-fill red" id="compbar-financiamento" style="width: 80%"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="divider"></div>
+
+                        <!-- Tabela Comparativa -->
+                        <div class="comparison-table-wrapper">
+                            <table class="comparison-table" id="tabela-comparativa">
+                                <thead>
+                                    <tr>
+                                        <th>Critério</th>
+                                        <th class="col-consorcio">Consórcio</th>
+                                        <th class="col-financiamento">Financiamento</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td id="label-comp-parcela">Parcela Mensal</td>
+                                        <td class="col-consorcio highlight" id="tab-parcela-consorcio">R$ 413,00</td>
+                                        <td class="col-financiamento" id="tab-parcela-financiamento">R$ 0,00</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Prazo</td>
+                                        <td class="col-consorcio" id="tab-prazo-consorcio">200 meses</td>
+                                        <td class="col-financiamento" id="tab-prazo-financiamento">200 meses</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Entrada / Lance</td>
+                                        <td class="col-consorcio" id="tab-lance-consorcio">R$ 30.000,00</td>
+                                        <td class="col-financiamento" id="tab-entrada-financiamento">R$ 30.000,00</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Custo Total</td>
+                                        <td class="col-consorcio" id="tab-custo-consorcio">R$ 112.600,00</td>
+                                        <td class="col-financiamento" id="tab-custo-financiamento">R$ 0,00</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Juros / Taxas Pagos</td>
+                                        <td class="col-consorcio" id="tab-juros-consorcio">R$ 12.600,00</td>
+                                        <td class="col-financiamento" id="tab-juros-financiamento">R$ 0,00</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="divider"></div>
+
+                        <!-- Veredito -->
+                        <div class="verdict-box" id="verdict-box">
+                            <div class="verdict-icon" id="verdict-icon">
+                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></svg>
+                            </div>
+                            <div class="verdict-text">
+                                <span class="verdict-title" id="verdict-title">Consórcio é mais vantajoso!</span>
+                                <span class="verdict-detail" id="verdict-detail">Você economiza R$ 0,00 escolhendo o consórcio.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="divider" style="margin: var(--space-xl) 0;"></div>
+
+                <div class="section-header" style="margin-bottom: var(--space-lg);">
+                    <h2>Dashboard Gráfico</h2>
+                    <p class="section-subtitle">Visão consolidada de todos os parâmetros da sua simulação</p>
+                </div>
+
+                <div class="dashboard-grid">
+                <!-- KPI Cards -->
+                <div class="kpi-row">
+                    <div class="glass-card kpi-card" id="kpi-carta">
+                        <div class="kpi-icon blue">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+                        </div>
+                        <div class="kpi-info">
+                            <span class="kpi-label">Carta de Crédito</span>
+                            <span class="kpi-value" id="kpi-valor-carta">R$ 100.000,00</span>
+                        </div>
+                    </div>
+                    <div class="glass-card kpi-card" id="kpi-parcela">
+                        <div class="kpi-icon emerald">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                        </div>
+                        <div class="kpi-info">
+                            <span class="kpi-label">Parcela Pós-Lance</span>
+                            <span class="kpi-value" id="kpi-valor-parcela">R$ 413,00</span>
+                        </div>
+                    </div>
+                    <div class="glass-card kpi-card" id="kpi-prazo">
+                        <div class="kpi-icon gold">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                        </div>
+                        <div class="kpi-info">
+                            <span class="kpi-label">Prazo Restante</span>
+                            <span class="kpi-value" id="kpi-valor-prazo">200 meses</span>
+                        </div>
+                    </div>
+                    <div class="glass-card kpi-card" id="kpi-economia">
+                        <div class="kpi-icon purple">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+                        </div>
+                        <div class="kpi-info">
+                            <span class="kpi-label">Economia vs Financ.</span>
+                            <span class="kpi-value" id="kpi-valor-economia">R$ 0,00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart: Evolução de Parcelas -->
+                <div class="glass-card card-chart" id="card-chart-evolucao">
+                    <div class="card-header">
+                        <div class="card-icon blue">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                        </div>
+                        <h2>Evolução das Parcelas</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container" id="chart-evolucao">
+                            <canvas id="canvas-evolucao"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart: Composição de Custos -->
+                <div class="glass-card card-chart" id="card-chart-composicao">
+                    <div class="card-header">
+                        <div class="card-icon emerald">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 10 10"/><path d="M12 2v10l7.07 7.07"/></svg>
+                        </div>
+                        <h2>Composição de Custos</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="donut-chart-container">
+                            <div class="donut-chart" id="donut-consorcio">
+                                <canvas id="canvas-donut-consorcio" width="200" height="200"></canvas>
+                                <div class="donut-center">
+                                    <span class="donut-label">Consórcio</span>
+                                    <span class="donut-value" id="donut-total-consorcio">R$ 0</span>
+                                </div>
+                            </div>
+                            <div class="donut-chart" id="donut-financiamento">
+                                <canvas id="canvas-donut-financiamento" width="200" height="200"></canvas>
+                                <div class="donut-center">
+                                    <span class="donut-label">Financ.</span>
+                                    <span class="donut-value" id="donut-total-financiamento">R$ 0</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="donut-legend">
+                            <span class="legend-item"><span class="legend-dot blue"></span> Amortização</span>
+                            <span class="legend-item"><span class="legend-dot emerald"></span> Taxas / Admin</span>
+                            <span class="legend-item"><span class="legend-dot red"></span> Juros</span>
+                            <span class="legend-item"><span class="legend-dot gold"></span> Lance / Entrada</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabela de Amortização -->
+                <div class="glass-card card-amortizacao" id="card-amortizacao">
+                    <div class="card-header">
+                        <div class="card-icon gold">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                        </div>
+                        <h2>Tabela de Amortização (Financiamento)</h2>
+                        <button class="btn-toggle-table" id="btn-toggle-amort">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                        </button>
+                    </div>
+                    <div class="card-body table-collapsible collapsed" id="amort-table-body">
+                        <div class="table-scroll">
+                            <table class="amort-table" id="tabela-amortizacao">
+                                <thead>
+                                    <tr>
+                                        <th>Mês</th>
+                                        <th>Parcela</th>
+                                        <th>Juros</th>
+                                        <th>Amortização</th>
+                                        <th>Saldo Devedor</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="amort-tbody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer id="main-footer">
+        <div class="footer-content">
+            <p>Consórcio<span class="logo-accent">Pro</span> &copy; 2026 — Simulador de Consórcios Avançado</p>
+            <p class="footer-disclaimer">Este simulador é meramente ilustrativo e não constitui oferta de crédito ou recomendação financeira.</p>
+        </div>
+    </footer>
+
+    <!-- Chart.js para gráficos modernos e interativos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="calculator.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
