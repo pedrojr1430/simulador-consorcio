@@ -875,11 +875,23 @@
                     const economia = totalFinanciamento - totalConsorcio;
                     const economiaStr = economia > 0 ? Calculator.formatarMoeda(economia) : 'R$ 0,00';
 
+                    let lanceTextoIA = "R$ 0,00";
+                    if (state._lance && state._lance.totalLanceOfertado > 0) {
+                        let partes = [];
+                        if (state._lance.lanceProprio > 0) {
+                            partes.push(`Próprio: ${lanceModes.lanceProprio === 'pct' ? state.lanceProprio + '% (' : ''}${Calculator.formatarMoeda(state._lance.lanceProprio)}${lanceModes.lanceProprio === 'pct' ? ')' : ''}`);
+                        }
+                        if (state._lance.lanceEmbutido > 0) {
+                            partes.push(`Embutido: ${lanceModes.lanceEmbutido === 'pct' ? state.lanceEmbutido + '% (' : ''}${Calculator.formatarMoeda(state._lance.lanceEmbutido)}${lanceModes.lanceEmbutido === 'pct' ? ')' : ''}`);
+                        }
+                        lanceTextoIA = partes.join(" + ");
+                    }
+
                     const payload = {
-                        valorCarta: Calculator.formatarMoeda(state.valorCarta || 0),
+                        valorCarta: Calculator.formatarMoeda(state.valorCarta),
                         valorParcela: Calculator.formatarMoeda(state._lance ? state._lance.novaParcela : 0),
                         prazo: state._lance ? state._lance.novoPrazo : 0,
-                        lance: Calculator.formatarMoeda(state.lanceProprio + state.lanceEmbutido),
+                        lance: lanceTextoIA,
                         economiaTotal: economiaStr,
                         parcelaFinanciamento: state._finAtivo && state._finAtivo.tabela && state._finAtivo.tabela[0] ? Calculator.formatarMoeda(state._finAtivo.tabela[0].parcela) : 'R$ 0,00',
                         prazoFinanciamento: state.prazoFinanciamento || 0,
@@ -1079,7 +1091,7 @@
                                 <div class="pdf-solo-row"><span class="pdf-solo-label">Crédito (Capital):</span><span class="pdf-solo-val">${fmtMoeda(valorBem)}</span></div>
                                 <div class="pdf-solo-row"><span class="pdf-solo-label">Prazo do Grupo:</span><span class="pdf-solo-val">${prazoC} meses</span></div>
                                 <div class="pdf-solo-row"><span class="pdf-solo-label">Taxa Administrativa:</span><span class="pdf-solo-val">${state.taxaAdmin}% total</span></div>
-                                <div class="pdf-solo-row"><span class="pdf-solo-label">Lance Ofertado:</span><span class="pdf-solo-val">${fmtMoeda(state.lanceProprio + state.lanceEmbutido)}</span></div>
+                                <div class="pdf-solo-row"><span class="pdf-solo-label">Lance Ofertado:</span><span class="pdf-solo-val">${fmtMoeda(state._lance ? state._lance.totalLanceOfertado : 0)}</span></div>
                                 <div class="pdf-solo-row"><span class="pdf-solo-label">Parcela Mensal:</span><span class="pdf-solo-val">${fmtMoeda(parcelaC)}</span></div>
                                 <div class="pdf-solo-total"><span>Custo Total da Operação:</span><span>${fmtMoeda(totalC)}</span></div>
                             </div>
