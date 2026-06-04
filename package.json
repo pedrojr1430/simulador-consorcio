@@ -1,0 +1,8 @@
+{
+  "name": "simulador-consorcio",
+  "version": "1.0.0",
+  "description": "Simulador Avançado",
+  "dependencies": {
+    "openai": "^4.28.0"
+  }
+}

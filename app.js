@@ -189,6 +189,10 @@
                 // Redraw charts if dashboard
                 if (targetSection === 'dashboard') {
                     setTimeout(() => drawAllCharts(), 100);
+                    // Disparar chatbot se a economia for positiva
+                    if (window.triggerChatbotIfNeeded) {
+                        window.triggerChatbotIfNeeded();
+                    }
                 } else if (targetSection === 'simulador') {
                     setTimeout(() => drawEvolucaoChart('canvas-evolucao-main'), 100);
                 }
@@ -1066,7 +1070,107 @@
         setTimeout(() => {
             document.body.classList.add('loaded');
         }, 100);
+
+        // Inicializar Chatbot
+        initChatbot();
     }
+
+    // ── Lógica do Chatbot IA ──────────────────────────────────
+    function initChatbot() {
+        const chatbot = $('#ai-chatbot');
+        const closeBtn = $('#chatbot-close');
+        const floatBtn = $('#btn-chatbot-float');
+        const status = $('#chatbot-status');
+        const content = $('#chatbot-content');
+        const text = $('#chatbot-text');
+        const audio = $('#chatbot-audio');
+        const audioContainer = $('#chatbot-audio-container');
+        let hasGenerated = false;
+
+        if (closeBtn) closeBtn.addEventListener('click', () => {
+            chatbot.classList.add('hidden');
+            floatBtn.classList.remove('hidden');
+            if (audio) audio.pause();
+        });
+
+        if (floatBtn) floatBtn.addEventListener('click', () => {
+            floatBtn.classList.add('hidden');
+            chatbot.classList.remove('hidden');
+            if (!hasGenerated) {
+                generatePitch();
+            } else {
+                if (audio && audio.src) audio.play();
+            }
+        });
+
+        window.triggerChatbotIfNeeded = function() {
+            // Só dispara se houver economia positiva pro consórcio e ainda não foi gerado
+            if (hasGenerated) return;
+            const totalConsorcio = state._lance ? state._lance.totalPago : 0;
+            const totalFinanciamento = state._finAtivo ? state._finAtivo.totalPago : 0;
+            const economia = totalFinanciamento - totalConsorcio;
+
+            if (economia > 0 && state.valorCarta > 0) {
+                setTimeout(() => {
+                    floatBtn.classList.add('hidden');
+                    chatbot.classList.remove('hidden');
+                    generatePitch();
+                }, 1500); // Aguarda 1.5s após abrir o dashboard
+            }
+        };
+
+        async function generatePitch() {
+            hasGenerated = true;
+            status.style.display = 'flex';
+            content.classList.remove('active');
+            audioContainer.style.display = 'none';
+
+            const totalConsorcio = state._lance ? state._lance.totalPago : 0;
+            const totalFinanciamento = state._finAtivo ? state._finAtivo.totalPago : 0;
+            const economia = totalFinanciamento - totalConsorcio;
+
+            const payload = {
+                valorCarta: Calculator.formatarMoeda(state.valorCarta),
+                valorParcela: Calculator.formatarMoeda(state._lance.novaParcela),
+                prazo: state._lance.novoPrazo,
+                lance: Calculator.formatarMoeda(state.lanceProprio + state.lanceEmbutido),
+                economiaTotal: Calculator.formatarMoeda(economia)
+            };
+
+            try {
+                const response = await fetch('/api/generate-pitch', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error('Erro na API');
+                
+                const data = await response.json();
+                
+                status.style.display = 'none';
+                content.classList.add('active');
+                text.innerHTML = data.text.replace(/\\n/g, '<br>');
+                
+                if (data.audio) {
+                    audioContainer.style.display = 'block';
+                    audio.src = data.audio;
+                    // Tenta tocar automaticamente (o navegador pode bloquear se o usuário não interagiu muito)
+                    audio.play().catch(e => console.log('Autoplay do áudio bloqueado pelo navegador.'));
+                }
+
+            } catch (err) {
+                console.error(err);
+                status.innerHTML = 'Houve um erro de comunicação com a IA.';
+                setTimeout(() => {
+                    chatbot.classList.add('hidden');
+                    floatBtn.classList.remove('hidden');
+                    hasGenerated = false;
+                }, 3000);
+            }
+        }
+    }
+
 
     // Start
     if (document.readyState === 'loading') {
