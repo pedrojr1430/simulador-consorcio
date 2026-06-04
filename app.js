@@ -190,9 +190,7 @@
                 if (targetSection === 'dashboard') {
                     setTimeout(() => drawAllCharts(), 100);
                     // Disparar chatbot se a economia for positiva
-                    if (window.triggerChatbotIfNeeded) {
-                        window.triggerChatbotIfNeeded();
-                    }
+
                 } else if (targetSection === 'simulador') {
                     setTimeout(() => drawEvolucaoChart('canvas-evolucao-main'), 100);
                 }
@@ -840,14 +838,52 @@
         // Exportar PDF
         const btnExportPdf = $('#btn-export-pdf');
         if (btnExportPdf) {
-            btnExportPdf.addEventListener('click', () => {
+            btnExportPdf.addEventListener('click', async () => {
+                if (state.valorCarta <= 0) {
+                    alert('Por favor, preencha o valor da carta de crédito do consórcio antes de gerar a proposta.');
+                    return;
+                }
+
                 const originalText = btnExportPdf.innerHTML;
-                btnExportPdf.innerHTML = 'Gerando Proposta...';
-                btnExportPdf.style.opacity = '0.6';
-                btnExportPdf.disabled = true;
+                btnExportPdf.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation: spin 1s linear infinite;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Gerando Proposta com IA...';
+                btnExportPdf.style.opacity = '0.7';
+                btnExportPdf.style.pointerEvents = 'none';
 
                 try {
-                    // Acessa jsPDF do bundle html2pdf
+                    // ── 1. BUSCAR PARECER DA IA ──
+                    const totalConsorcio = state._lance ? state._lance.totalPago : 0;
+                    const totalFinanciamento = state._finAtivo ? state._finAtivo.totalPago : 0;
+                    const economia = totalFinanciamento - totalConsorcio;
+                    const economiaStr = economia > 0 ? Calculator.formatarMoeda(economia) : 'R$ 0,00';
+
+                    const payload = {
+                        valorCarta: Calculator.formatarMoeda(state.valorCarta || 0),
+                        valorParcela: Calculator.formatarMoeda(state._lance ? state._lance.novaParcela : 0),
+                        prazo: state._lance ? state._lance.novoPrazo : 0,
+                        lance: Calculator.formatarMoeda(state.lanceProprio + state.lanceEmbutido),
+                        economiaTotal: economiaStr,
+                        parcelaFinanciamento: state._finAtivo && state._finAtivo.tabela && state._finAtivo.tabela[0] ? Calculator.formatarMoeda(state._finAtivo.tabela[0].parcela) : 'R$ 0,00',
+                        prazoFinanciamento: state.prazoFinanciamento || 0,
+                        totalConsorcio: Calculator.formatarMoeda(totalConsorcio),
+                        totalFinanciamento: Calculator.formatarMoeda(totalFinanciamento)
+                    };
+
+                    let iaText = '';
+                    try {
+                        const response = await fetch('/api/generate-pitch', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+                        if (response.ok) {
+                            const data = await response.json();
+                            iaText = data.text;
+                        }
+                    } catch (e) {
+                        console.error('Falha ao comunicar com IA', e);
+                    }
+
+                    // ── 2. GERAR O PDF ──
                     const { jsPDF } = window.jspdf;
                     const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
                     const pw = 210; // largura A4
@@ -855,214 +891,191 @@
                     const cw = pw - mx * 2; // largura útil = 170mm
                     let y = 20; // cursor vertical
 
-                    // ── Helpers ──
-                    const hexToRgb = (hex) => {
-                        const r = parseInt(hex.slice(1,3),16);
-                        const g = parseInt(hex.slice(3,5),16);
-                        const b = parseInt(hex.slice(5,7),16);
-                        return [r,g,b];
-                    };
                     const fmtMoeda = (v) => Calculator.formatarMoeda(v);
 
-                    // ── Dados ──
+                    // ── Dados Básicos ──
                     const valorBem = state._lance ? state._lance.cartaEfetiva : state.valorCarta;
                     const parcelaC = state._lance ? state._lance.novaParcela : 0;
                     const totalC = state._lance ? state._lance.totalPago : 0;
                     const totalF = state._finAtivo ? state._finAtivo.totalPago : 0;
                     const parcelaF = state._finAtivo ? (state._finAtivo.tabela[0]?.parcela || 0) : 0;
                     const prazoC = state._lance ? state._lance.novoPrazo : state.prazo;
-                    const economia = totalF - totalC;
-                    const vencedor = economia >= 0 ? 'Consórcio' : 'Financiamento';
+                    const prazoF = state.prazoFinanciamento || 0;
+                    
+                    const isComparativo = (totalF > 0);
 
                     // ═══════════════════════════════════════
                     // CABEÇALHO
                     // ═══════════════════════════════════════
-                    doc.setFontSize(22);
+                    doc.setFillColor(15, 23, 42);
+                    doc.rect(0, 0, pw, 40, 'F');
+                    
+                    doc.setFontSize(24);
                     doc.setFont('helvetica', 'bold');
                     doc.setTextColor(6, 182, 212); // cyan
-                    doc.text('ConsórcioPro', mx, y);
+                    doc.text('ConsórcioPro', mx, 22);
 
-                    doc.setFontSize(10);
+                    doc.setFontSize(11);
                     doc.setFont('helvetica', 'normal');
-                    doc.setTextColor(100, 116, 139);
-                    doc.text('Estudo Comparativo de Viabilidade', mx, y + 7);
+                    doc.setTextColor(255, 255, 255);
+                    doc.text('Apresentação Comercial de Viabilidade', mx, 30);
 
                     doc.setFontSize(9);
                     doc.setTextColor(148, 163, 184);
-                    doc.text('Data: ' + new Date().toLocaleDateString('pt-BR'), mx + cw, y, { align: 'right' });
-                    doc.text('Simulação Oficial', mx + cw, y + 5, { align: 'right' });
+                    doc.text(new Date().toLocaleDateString('pt-BR'), mx + cw, 22, { align: 'right' });
+                    doc.text('Proposta Oficial', mx + cw, 28, { align: 'right' });
 
-                    // Linha separadora
-                    y += 12;
-                    doc.setDrawColor(6, 182, 212);
-                    doc.setLineWidth(0.8);
-                    doc.line(mx, y, mx + cw, y);
-                    y += 10;
+                    y = 50;
 
                     // ═══════════════════════════════════════
-                    // CARTÕES COMPARATIVOS
+                    // PARECER DO ESPECIALISTA (IA)
                     // ═══════════════════════════════════════
-                    const cardW = (cw - 6) / 2; // largura de cada cartão
-                    const cardH = 58;
-                    const cardX1 = mx;
-                    const cardX2 = mx + cardW + 6;
+                    if (iaText) {
+                        doc.setFillColor(240, 244, 252);
+                        doc.setDrawColor(219, 234, 254);
+                        doc.setLineWidth(0.5);
+                        doc.roundedRect(mx, y, cw, 60, 3, 3, 'FD');
 
-                    // Fundo dos cartões
-                    doc.setFillColor(248, 250, 252);
-                    doc.setDrawColor(226, 232, 240);
-                    doc.setLineWidth(0.3);
-                    doc.roundedRect(cardX1, y, cardW, cardH, 3, 3, 'FD');
-                    doc.roundedRect(cardX2, y, cardW, cardH, 3, 3, 'FD');
-
-                    // ── Cartão Consórcio ──
-                    let cy = y + 8;
-                    doc.setFontSize(13);
-                    doc.setFont('helvetica', 'bold');
-                    doc.setTextColor(6, 182, 212);
-                    doc.text('Consórcio', cardX1 + 5, cy);
-                    cy += 3;
-                    doc.setDrawColor(203, 213, 225);
-                    doc.line(cardX1 + 5, cy, cardX1 + cardW - 5, cy);
-                    cy += 6;
-
-                    doc.setFontSize(9);
-                    doc.setFont('helvetica', 'normal');
-                    doc.setTextColor(30, 41, 59);
-                    const consLines = [
-                        ['Crédito:', fmtMoeda(valorBem)],
-                        ['Prazo:', prazoC + ' meses'],
-                        ['Taxa Adm:', state.taxaAdmin + '%'],
-                        ['Fundo Reserva:', state.fundoReserva + '%'],
-                        ['Parcela:', fmtMoeda(parcelaC)]
-                    ];
-                    consLines.forEach(([label, val]) => {
+                        doc.setFontSize(11);
                         doc.setFont('helvetica', 'bold');
-                        doc.text(label, cardX1 + 5, cy);
+                        doc.setTextColor(30, 58, 138);
+                        doc.text('Parecer do Especialista (Inteligência Artificial)', mx + 5, y + 8);
+
+                        doc.setFontSize(9);
                         doc.setFont('helvetica', 'normal');
-                        doc.text(val, cardX1 + 35, cy);
-                        cy += 5;
-                    });
-                    cy += 2;
-                    doc.setFontSize(11);
-                    doc.setFont('helvetica', 'bold');
-                    doc.setTextColor(15, 23, 42);
-                    doc.text('Total: ' + fmtMoeda(totalC), cardX1 + 5, cy);
+                        doc.setTextColor(51, 65, 85);
+                        
+                        // Quebrar o texto longo em linhas que cabem na caixa
+                        const splitText = doc.splitTextToSize(iaText, cw - 10);
+                        doc.text(splitText, mx + 5, y + 16);
 
-                    // ── Cartão Financiamento ──
-                    let fy = y + 8;
-                    doc.setFontSize(13);
-                    doc.setFont('helvetica', 'bold');
-                    doc.setTextColor(239, 68, 68);
-                    doc.text('Financiamento', cardX2 + 5, fy);
-                    fy += 3;
-                    doc.setDrawColor(203, 213, 225);
-                    doc.line(cardX2 + 5, fy, cardX2 + cardW - 5, fy);
-                    fy += 6;
-
-                    doc.setFontSize(9);
-                    doc.setFont('helvetica', 'normal');
-                    doc.setTextColor(30, 41, 59);
-                    const finLines = [
-                        ['Valor Financ.:', fmtMoeda(valorBem)],
-                        ['Prazo:', state.prazoFinanciamento + ' meses'],
-                        ['Juros:', state.taxaJuros + '% a.a.'],
-                        ['TR:', state.taxaTR > 0 ? state.taxaTR + '% a.a.' : 'Não aplicada'],
-                        ['Parcela Inicial:', fmtMoeda(parcelaF)]
-                    ];
-                    finLines.forEach(([label, val]) => {
-                        doc.setFont('helvetica', 'bold');
-                        doc.text(label, cardX2 + 5, fy);
-                        doc.setFont('helvetica', 'normal');
-                        doc.text(val, cardX2 + 35, fy);
-                        fy += 5;
-                    });
-                    fy += 2;
-                    doc.setFontSize(11);
-                    doc.setFont('helvetica', 'bold');
-                    doc.setTextColor(15, 23, 42);
-                    doc.text('Total: ' + fmtMoeda(totalF), cardX2 + 5, fy);
-
-                    y += cardH + 10;
+                        y += 68;
+                    }
 
                     // ═══════════════════════════════════════
-                    // VEREDITO
+                    // CARTÕES FINANCEIROS
                     // ═══════════════════════════════════════
-                    const verdH = 28;
-                    const corBg = economia >= 0 ? [236, 253, 245] : [254, 242, 242];
-                    const corBorda = economia >= 0 ? [16, 185, 129] : [239, 68, 68];
-                    const corTexto = economia >= 0 ? [4, 120, 87] : [185, 28, 28];
-
-                    doc.setFillColor(...corBg);
-                    doc.setDrawColor(...corBorda);
-                    doc.setLineWidth(0.6);
-                    doc.roundedRect(mx, y, cw, verdH, 3, 3, 'FD');
-
-                    doc.setFontSize(8);
-                    doc.setFont('helvetica', 'bold');
-                    doc.setTextColor(...corTexto);
-                    doc.text('VEREDITO DA SIMULAÇÃO', mx + cw / 2, y + 8, { align: 'center' });
-
                     doc.setFontSize(14);
-                    doc.text('Economia de ' + fmtMoeda(Math.abs(economia)), mx + cw / 2, y + 16, { align: 'center' });
+                    doc.setFont('helvetica', 'bold');
+                    doc.setTextColor(15, 23, 42);
+                    doc.text('Resumo Financeiro da Operação', mx, y);
+                    y += 6;
 
-                    doc.setFontSize(10);
-                    doc.setFont('helvetica', 'normal');
-                    doc.text('escolhendo o ' + vencedor, mx + cw / 2, y + 22, { align: 'center' });
+                    if (isComparativo) {
+                        const cardW = (cw - 6) / 2;
+                        const cardH = 58;
+                        const cardX1 = mx;
+                        const cardX2 = mx + cardW + 6;
 
-                    y += verdH + 10;
+                        doc.setFillColor(248, 250, 252);
+                        doc.setDrawColor(226, 232, 240);
+                        doc.roundedRect(cardX1, y, cardW, cardH, 3, 3, 'FD');
+                        doc.roundedRect(cardX2, y, cardW, cardH, 3, 3, 'FD');
+
+                        // ── Consórcio ──
+                        let cy = y + 8;
+                        doc.setFontSize(13); doc.setFont('helvetica', 'bold'); doc.setTextColor(6, 182, 212);
+                        doc.text('Consórcio', cardX1 + 5, cy);
+                        cy += 3; doc.setDrawColor(203, 213, 225); doc.line(cardX1 + 5, cy, cardX1 + cardW - 5, cy); cy += 6;
+
+                        doc.setFontSize(9); doc.setFont('helvetica', 'normal'); doc.setTextColor(30, 41, 59);
+                        const consLines = [
+                            ['Crédito:', fmtMoeda(valorBem)],
+                            ['Prazo:', prazoC + ' meses'],
+                            ['Taxa Adm:', state.taxaAdmin + '%'],
+                            ['Parcela:', fmtMoeda(parcelaC)]
+                        ];
+                        consLines.forEach(([l, v]) => { doc.setFont('helvetica', 'bold'); doc.text(l, cardX1 + 5, cy); doc.setFont('helvetica', 'normal'); doc.text(v, cardX1 + 32, cy); cy += 5; });
+                        cy += 4; doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(15, 23, 42);
+                        doc.text('Total Final: ' + fmtMoeda(totalC), cardX1 + 5, cy);
+
+                        // ── Financiamento ──
+                        let fy = y + 8;
+                        doc.setFontSize(13); doc.setFont('helvetica', 'bold'); doc.setTextColor(239, 68, 68);
+                        doc.text('Financiamento', cardX2 + 5, fy);
+                        fy += 3; doc.setDrawColor(203, 213, 225); doc.line(cardX2 + 5, fy, cardX2 + cardW - 5, fy); fy += 6;
+
+                        doc.setFontSize(9); doc.setFont('helvetica', 'normal'); doc.setTextColor(30, 41, 59);
+                        const finLines = [
+                            ['Crédito:', fmtMoeda(valorBem)],
+                            ['Prazo:', prazoF + ' meses'],
+                            ['Juros a.a.:', state.taxaJuros + '%'],
+                            ['Parcela 1ª:', fmtMoeda(parcelaF)]
+                        ];
+                        finLines.forEach(([l, v]) => { doc.setFont('helvetica', 'bold'); doc.text(l, cardX2 + 5, fy); doc.setFont('helvetica', 'normal'); doc.text(v, cardX2 + 32, fy); fy += 5; });
+                        fy += 4; doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(15, 23, 42);
+                        doc.text('Total Final: ' + fmtMoeda(totalF), cardX2 + 5, fy);
+
+                        y += cardH + 8;
+
+                        // ── Veredito ──
+                        if (economia > 0) {
+                            doc.setFillColor(236, 253, 245); doc.setDrawColor(16, 185, 129); doc.roundedRect(mx, y, cw, 20, 3, 3, 'FD');
+                            doc.setFontSize(12); doc.setFont('helvetica', 'bold'); doc.setTextColor(4, 120, 87);
+                            doc.text('ECONOMIA GERADA: ' + fmtMoeda(economia), mx + cw / 2, y + 12, { align: 'center' });
+                            y += 28;
+                        }
+                    } else {
+                        // Apenas Consórcio
+                        const cardW = 100;
+                        const cardX1 = mx + (cw - cardW) / 2; // centralizado
+                        const cardH = 55;
+
+                        doc.setFillColor(248, 250, 252);
+                        doc.setDrawColor(226, 232, 240);
+                        doc.roundedRect(cardX1, y, cardW, cardH, 3, 3, 'FD');
+
+                        let cy = y + 8;
+                        doc.setFontSize(13); doc.setFont('helvetica', 'bold'); doc.setTextColor(6, 182, 212);
+                        doc.text('Plano de Consórcio (Detalhes)', cardX1 + 5, cy);
+                        cy += 3; doc.setDrawColor(203, 213, 225); doc.line(cardX1 + 5, cy, cardX1 + cardW - 5, cy); cy += 6;
+
+                        doc.setFontSize(9); doc.setFont('helvetica', 'normal'); doc.setTextColor(30, 41, 59);
+                        const consLines = [
+                            ['Crédito (Valor do Bem):', fmtMoeda(valorBem)],
+                            ['Prazo de Pagamento:', prazoC + ' meses'],
+                            ['Taxa de Administração:', state.taxaAdmin + '% total'],
+                            ['Lance Ofertado:', fmtMoeda(state.lanceProprio + state.lanceEmbutido)],
+                            ['Parcela Mensal:', fmtMoeda(parcelaC)]
+                        ];
+                        consLines.forEach(([l, v]) => { doc.setFont('helvetica', 'bold'); doc.text(l, cardX1 + 5, cy); doc.setFont('helvetica', 'normal'); doc.text(v, cardX1 + 55, cy); cy += 5; });
+                        cy += 3; doc.setFontSize(12); doc.setFont('helvetica', 'bold'); doc.setTextColor(15, 23, 42);
+                        doc.text('Custo Final: ' + fmtMoeda(totalC), cardX1 + 5, cy);
+
+                        y += cardH + 10;
+                    }
 
                     // ═══════════════════════════════════════
-                    // GRÁFICO
+                    // GRÁFICO (Se houver espaço)
                     // ═══════════════════════════════════════
                     let chartBase64 = '';
-                    if (chartInstances['canvas-evolucao-main']) {
-                        chartBase64 = chartInstances['canvas-evolucao-main'].toBase64Image('image/png', 1.0);
-                    } else if (chartInstances['canvas-evolucao']) {
-                        chartBase64 = chartInstances['canvas-evolucao'].toBase64Image('image/png', 1.0);
-                    }
+                    if (chartInstances['canvas-evolucao-main']) chartBase64 = chartInstances['canvas-evolucao-main'].toBase64Image('image/png', 1.0);
+                    else if (chartInstances['canvas-evolucao']) chartBase64 = chartInstances['canvas-evolucao'].toBase64Image('image/png', 1.0);
 
-                    if (chartBase64) {
+                    if (chartBase64 && y < 220) {
                         doc.setDrawColor(226, 232, 240);
-                        doc.setLineWidth(0.3);
-                        doc.roundedRect(mx, y, cw, 80, 3, 3, 'S');
-
-                        doc.setFontSize(10);
-                        doc.setFont('helvetica', 'bold');
-                        doc.setTextColor(51, 65, 85);
-                        doc.text('Evolução das Parcelas', mx + cw / 2, y + 7, { align: 'center' });
-
-                        try {
-                            doc.addImage(chartBase64, 'PNG', mx + 5, y + 10, cw - 10, 65);
-                        } catch(e) { /* ignora se falhar */ }
-
-                        y += 85;
+                        doc.roundedRect(mx, y, cw, 60, 3, 3, 'S');
+                        doc.setFontSize(10); doc.setFont('helvetica', 'bold'); doc.setTextColor(51, 65, 85);
+                        doc.text('Evolução das Parcelas ao Longo do Tempo', mx + cw / 2, y + 7, { align: 'center' });
+                        try { doc.addImage(chartBase64, 'PNG', mx + 5, y + 10, cw - 10, 45); } catch(e) {}
                     }
 
-                    // ═══════════════════════════════════════
-                    // RODAPÉ / DISCLAIMER
-                    // ═══════════════════════════════════════
-                    y += 10;
-                    doc.setDrawColor(226, 232, 240);
-                    doc.setLineWidth(0.2);
-                    doc.line(mx, y, mx + cw, y);
-                    y += 6;
-                    doc.setFontSize(7);
-                    doc.setFont('helvetica', 'normal');
-                    doc.setTextColor(148, 163, 184);
-                    doc.text('Este documento é uma simulação e não configura proposta de crédito oficial.', mx + cw / 2, y, { align: 'center' });
-                    doc.text('Valores sujeitos a alteração conforme análise de crédito e variação de índices.', mx + cw / 2, y + 4, { align: 'center' });
+                    // ── RODAPÉ ──
+                    doc.setFontSize(7); doc.setFont('helvetica', 'normal'); doc.setTextColor(148, 163, 184);
+                    doc.text('Este documento é uma simulação gerada por Inteligência Artificial (OpenAI) e não configura proposta de crédito oficial.', mx + cw / 2, 280, { align: 'center' });
+                    doc.text('Valores sujeitos a alteração conforme análise de crédito e variação de índices.', mx + cw / 2, 284, { align: 'center' });
 
-                    // ── Salvar ──
-                    doc.save('Proposta_ConsorcioPro.pdf');
+                    // Salvar
+                    doc.save('Apresentacao_Proposta_Inteligente.pdf');
 
                 } catch (err) {
                     console.error('Erro ao gerar PDF:', err);
-                    alert('Erro ao gerar o PDF. Verifique o console para detalhes.');
+                    alert('Erro ao gerar a apresentação em PDF. Verifique o console.');
                 }
 
                 btnExportPdf.innerHTML = originalText;
                 btnExportPdf.style.opacity = '1';
-                btnExportPdf.disabled = false;
+                btnExportPdf.style.pointerEvents = 'auto';
             });
         }
 
@@ -1070,104 +1083,7 @@
         setTimeout(() => {
             document.body.classList.add('loaded');
         }, 100);
-
-        // Inicializar Chatbot
-        initChatbot();
     }
-
-    // ── Lógica do Chatbot IA ──────────────────────────────────
-    function initChatbot() {
-        const chatbot = $('#ai-chatbot');
-        const closeBtn = $('#chatbot-close');
-        const floatBtn = $('#btn-chatbot-float');
-        const status = $('#chatbot-status');
-        const content = $('#chatbot-content');
-        const text = $('#chatbot-text');
-        const audio = $('#chatbot-audio');
-        const audioContainer = $('#chatbot-audio-container');
-        let hasGenerated = false;
-
-        if (closeBtn) closeBtn.addEventListener('click', () => {
-            chatbot.classList.add('hidden');
-            floatBtn.classList.remove('hidden');
-            if (audio) audio.pause();
-        });
-
-        if (floatBtn) floatBtn.addEventListener('click', () => {
-            floatBtn.classList.add('hidden');
-            chatbot.classList.remove('hidden');
-            if (!hasGenerated) {
-                generatePitch();
-            } else {
-                if (audio && audio.src) audio.play();
-            }
-        });
-
-        window.triggerChatbotIfNeeded = function() {
-            // Apenas acende um brilho no botão caso haja simulação pronta
-            if (hasGenerated) return;
-            const floatBtn = $('#btn-chatbot-float');
-            if (floatBtn) {
-                floatBtn.classList.add('pulse');
-            }
-        };
-
-        async function generatePitch() {
-            hasGenerated = true;
-            status.style.display = 'flex';
-            content.classList.remove('active');
-            audioContainer.style.display = 'none';
-
-            const totalConsorcio = state._lance ? state._lance.totalPago : 0;
-            const totalFinanciamento = state._finAtivo ? state._finAtivo.totalPago : 0;
-            const economia = totalFinanciamento - totalConsorcio;
-
-            // Define se a economia é aplicável ou se enviará zerado para o modo isolado
-            const economiaStr = economia > 0 ? Calculator.formatarMoeda(economia) : 'R$ 0,00';
-
-            const payload = {
-                valorCarta: Calculator.formatarMoeda(state.valorCarta || 0),
-                valorParcela: Calculator.formatarMoeda(state._lance ? state._lance.novaParcela : 0),
-                prazo: state._lance ? state._lance.novoPrazo : 0,
-                lance: Calculator.formatarMoeda(state.lanceProprio + state.lanceEmbutido),
-                economiaTotal: economiaStr,
-                parcelaFinanciamento: state._finAtivo && state._finAtivo.tabela && state._finAtivo.tabela[0] ? Calculator.formatarMoeda(state._finAtivo.tabela[0].parcela) : 'R$ 0,00',
-                prazoFinanciamento: state.prazoFinanciamento || 0,
-                totalConsorcio: Calculator.formatarMoeda(totalConsorcio),
-                totalFinanciamento: Calculator.formatarMoeda(totalFinanciamento)
-            };
-
-            try {
-                const response = await fetch('/api/generate-pitch', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                if (!response.ok) throw new Error('Erro na API');
-                
-                const data = await response.json();
-                
-                status.style.display = 'none';
-                content.classList.add('active');
-                text.innerHTML = data.text.replace(/\\n/g, '<br>');
-                
-                if (data.audio) {
-                    audioContainer.style.display = 'block';
-                    audio.src = data.audio;
-                    audio.play().catch(e => console.log('Autoplay do áudio bloqueado pelo navegador.'));
-                }
-
-            } catch (err) {
-                console.error(err);
-                status.innerHTML = 'Houve um erro de comunicação com a IA.';
-                setTimeout(() => {
-                    hasGenerated = false;
-                }, 3000);
-            }
-        }
-    }
-
 
     // Start
     if (document.readyState === 'loading') {

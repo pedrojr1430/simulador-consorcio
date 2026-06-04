@@ -22,61 +22,46 @@ export default async function handler(req, res) {
             apiKey: process.env.OPENAI_API_KEY,
         });
 
-        // 1. Gerar o texto persuasivo (Pitch de Vendas)
+        // 1. Gerar o texto persuasivo (Parecer do Especialista)
         let prompt = '';
         
-        // Verifica se é uma simulação comparativa com economia válida
         const isComparativo = economiaTotal && economiaTotal !== 'R$ 0,00' && !economiaTotal.includes('-');
 
         if (isComparativo) {
-            prompt = `Você é um consultor financeiro especialista em consórcios e investimentos inteligentes.
-Faça a análise real de uma simulação financeira preenchida por um cliente, comparando o consórcio com o financiamento bancário tradicional:
-- Carta de Crédito (Valor do Bem): R$ ${valorCarta}
-- Consórcio: Parcela de R$ ${valorParcela} em ${prazo} meses (Custo Final: R$ ${totalConsorcio})
-- Financiamento: Parcela Inicial de R$ ${parcelaFinanciamento} em ${prazoFinanciamento} meses (Custo Final: R$ ${totalFinanciamento})
+            prompt = `Você é um Consultor Sênior de Investimentos redigindo um "Parecer do Especialista" formal e altamente persuasivo que será incluído na proposta comercial oficial (em PDF) de um cliente.
+DADOS DA OPERAÇÃO (Comparativo):
+- Carta de Crédito (Imóvel/Veículo): R$ ${valorCarta}
+- Consórcio: Parcela acessível de R$ ${valorParcela} em ${prazo} meses (Custo Final Total: R$ ${totalConsorcio})
+- Financiamento Bancário Tradicional: Parcela Inicial pesada de R$ ${parcelaFinanciamento} em ${prazoFinanciamento} meses (Custo Final Total: R$ ${totalFinanciamento})
 - Lance Ofertado: R$ ${lance}
-- Economia Total Gerada: R$ ${economiaTotal}
+- Economia Comprovada (Seu Lucro): R$ ${economiaTotal}
 
-Com base NESSES DADOS REAIS, crie um roteiro de vendas (pitch) narrativo, direto e extremamente persuasivo (máximo 3 parágrafos). Destaque a diferença absurda entre o que ele pagaria de parcela no banco (R$ ${parcelaFinanciamento}) contra a parcela acessível do consórcio (R$ ${valorParcela}). Mostre a economia total de R$ ${economiaTotal} como lucro, dinheiro que fica no bolso dele. Use um tom empolgante, de quem está mostrando o segredo financeiro dos ricos. Não use asteriscos ou emojis, pois o texto será lido por uma voz gerada por IA.`;
+Com base nesses dados, escreva um texto elegante, profissional e direto (exatamente 2 a 3 parágrafos). Destaque a diferença absurda entre o juros do banco (que gera a parcela de R$ ${parcelaFinanciamento}) e o poder do consórcio de alavancar o patrimônio gerando uma economia massiva de R$ ${economiaTotal}. O tom deve ser formal de negócio, encorajador, e deixar claro que a decisão pelo consórcio é a única logicamente aceitável para quem tem inteligência financeira. Não use saudações, vá direto ao parecer.`;
         } else {
-            prompt = `Você é um consultor financeiro especialista em consórcios e construção de patrimônio.
-Faça a análise real de uma simulação de consórcio preenchida por um cliente (sem comparativo com financiamento):
-- Carta de Crédito (Patrimônio): R$ ${valorCarta}
-- Parcela Mensal Acessível: R$ ${valorParcela}
-- Prazo do Grupo: ${prazo} meses
-- Custo Total Final: R$ ${totalConsorcio}
-- Lance Ofertado: R$ ${lance}
+            prompt = `Você é um Consultor Sênior de Investimentos redigindo um "Parecer do Especialista" formal e altamente persuasivo que será incluído na proposta comercial oficial (em PDF) de um cliente.
+DADOS DA OPERAÇÃO (Consórcio Individual):
+- Carta de Crédito (Construção de Patrimônio): R$ ${valorCarta}
+- Parcela Mensal Planejada: R$ ${valorParcela}
+- Prazo Estratégico: ${prazo} meses
+- Custo Final Total da Operação: R$ ${totalConsorcio}
+- Lance Ofertado Estratégico: R$ ${lance}
 
-Com base NESSES DADOS REAIS, crie um roteiro de vendas narrativo e persuasivo (máximo 3 parágrafos) focado em como o consórcio é a compra inteligente. Mostre que a parcela de R$ ${valorParcela} cabe com folga no orçamento para levantar um capital de R$ ${valorCarta}. Crie urgência (grupos em fechamento) e mostre que investir essa pequena parcela mensal é a ponte para a riqueza sem pagar juros bancários abusivos. Não use asteriscos ou emojis, pois o texto será lido por uma voz gerada por IA.`;
+Com base nesses dados, escreva um texto elegante, profissional e direto (exatamente 2 a 3 parágrafos). Enfatize como a parcela de R$ ${valorParcela} é um investimento poderoso e blindado contra juros abusivos. Mostre que levantar um capital de R$ ${valorCarta} pagando apenas as baixas taxas do consórcio é o verdadeiro segredo para a construção sólida de riqueza. O tom deve ser formal, demonstrando autoridade, criando urgência para a tomada de decisão. Não use saudações, vá direto ao parecer.`;
         }
 
         const chatCompletion = await openai.chat.completions.create({
             messages: [{ role: 'user', content: prompt }],
             model: 'gpt-4o-mini',
-            max_tokens: 250,
+            max_tokens: 300,
             temperature: 0.7,
         });
 
         const scriptText = chatCompletion.choices[0].message.content;
 
-        // 2. Gerar o Áudio (TTS)
-        const mp3 = await openai.audio.speech.create({
-            model: "tts-1",
-            voice: "onyx", // Voz masculina com tom de autoridade e confiança
-            input: scriptText,
-        });
-
-        const buffer = Buffer.from(await mp3.arrayBuffer());
-        const base64Audio = buffer.toString('base64');
-
-        // Retorna o texto e o áudio em base64
-        return res.status(200).json({
-            text: scriptText,
-            audio: `data:audio/mp3;base64,${base64Audio}`
-        });
+        return res.status(200).json({ text: scriptText });
 
     } catch (error) {
-        console.error('Erro ao gerar pitch:', error);
+        console.error('Erro ao gerar parecer:', error);
         return res.status(500).json({ error: 'Erro ao processar a inteligência artificial.' });
     }
 }
