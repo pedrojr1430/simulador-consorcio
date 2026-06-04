@@ -975,9 +975,7 @@
                             .pdf-verdict-val { font-size: 24px; font-weight: 800; color: #059669; margin: 0; }
                             .pdf-verdict-sub { font-size: 11px; color: #065f46; margin-top: 4px; }
                             
-                            .pdf-chart { border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; text-align: center; margin-bottom: 20px; background: #fafbfc; page-break-inside: avoid; margin-top: 20px; }
-                            .pdf-chart img { max-width: 100%; height: auto; max-height: 400px; }
-                            .pdf-chart-title { font-size: 12px; font-weight: 600; color: #475569; margin: 0 0 10px 0; text-transform: uppercase; letter-spacing: 0.5px; }
+
                             
                             .pdf-footer { text-align: center; font-size: 9px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 15px; margin-top: 25px; line-height: 1.6; }
                         </style>
@@ -1088,14 +1086,6 @@
                         `;
                     }
 
-                    // Chart HTML
-                    const chartHtml = chartImg ? `
-                        <div class="html2pdf__page-break"></div>
-                        <div class="pdf-chart">
-                            <p class="pdf-chart-title">Evolução Comparativa das Parcelas ao Longo do Tempo</p>
-                            <img src="${chartImg}" alt="Gráfico Comparativo">
-                        </div>
-                    ` : '';
 
                     const fullHtml = `
                         ${pdfCSS}
@@ -1118,7 +1108,6 @@
                             </div>
                             ${cardsHtml}
                             ${verdictHtml}
-                            ${chartHtml}
                             
                             <div class="pdf-footer">
                                 Este documento constitui uma simulação estratégica gerada por inteligência artificial e não configura proposta oficial vinculativa.<br>
