@@ -768,7 +768,6 @@
     // ── Inicialização ──────────────────────────────────────────
     function init() {
         setupNavigation();
-        setupAmortTable();
         setupChartToggles();
 
         setupCurrencyInput(elValorCarta, 'valorCarta');
@@ -814,15 +813,14 @@
         // Sliders
         setupSliderSync();
 
-        // Amort table toggle
-        setupAmortTable();
-
         // Theme Toggle
         const themeBtn = $('#theme-toggle');
         if (themeBtn) {
             themeBtn.addEventListener('click', () => {
                 document.body.classList.toggle('dark-mode');
-                localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+                try {
+                    localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+                } catch (e) { console.warn('localStorage indisponivel', e); }
                 // Redraw visible charts
                 if ($('#simulador').classList.contains('active-section')) {
                     drawEvolucaoChart('canvas-evolucao-main');
@@ -832,9 +830,11 @@
                 }
             });
             // Carregar preferencia
-            if (localStorage.getItem('theme') === 'dark') {
-                document.body.classList.add('dark-mode');
-            }
+            try {
+                if (localStorage.getItem('theme') === 'dark') {
+                    document.body.classList.add('dark-mode');
+                }
+            } catch (e) { console.warn('localStorage indisponivel', e); }
         }
 
         // Initial calculation
