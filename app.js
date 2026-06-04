@@ -522,7 +522,7 @@
         const priceData = fin.price.tabela.map(r => r.parcela);
         const sacData = fin.sac.tabela.map(r => r.parcela);
         const consorcioData = lance.tabela.map(r => r.parcela);
-        const maxMes = Math.max(prazoFinanciamento, lance.novoPrazo);
+        const maxMes = Math.max(state.prazoFinanciamento || 0, lance.novoPrazo);
 
         // Cria array de labels do eixo X (ex: 0, 1, 2... meses)
         const labels = Array.from({ length: maxMes }, (_, i) => i + 1);
@@ -535,14 +535,7 @@
 
         Chart.defaults.font.family = "'Inter', sans-serif";
 
-        let chartType = 'line';
-        if (canvasId === 'canvas-evolucao-main') {
-            const sel = $('#select-chart-type-main');
-            if (sel) chartType = sel.value;
-        } else if (canvasId === 'canvas-evolucao') {
-            const sel = $('#select-chart-type-evolucao');
-            if (sel) chartType = sel.value;
-        }
+        const chartType = 'bar';
 
         chartInstances[canvasId] = new Chart(canvas, {
             type: chartType, 
@@ -975,97 +968,164 @@
                     // CSS Interno para o PDF
                     const pdfCSS = `
                         <style>
-                            .pdf-wrapper { padding: 40px; box-sizing: border-box; }
-                            .pdf-header { background: #0f172a; padding: 30px 40px; color: white; display: flex; justify-content: space-between; align-items: center; margin: -40px -40px 30px -40px; }
-                            .pdf-title-box h1 { margin: 0; color: #06b6d4; font-size: 28px; font-weight: 800; }
-                            .pdf-title-box p { margin: 5px 0 0 0; color: #e2e8f0; font-size: 14px; }
-                            .pdf-date { text-align: right; color: #94a3b8; font-size: 12px; }
+                            * { margin: 0; padding: 0; box-sizing: border-box; }
+                            body { font-family: 'Inter', 'Segoe UI', sans-serif; color: #1e293b; }
+                            .pdf-wrapper { padding: 40px; }
                             
-                            .pdf-ia-box { background: #f8fafc; border-left: 4px solid #06b6d4; padding: 20px 25px; border-radius: 0 8px 8px 0; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
-                            .pdf-ia-title { color: #0f172a; font-weight: 700; font-size: 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
-                            .pdf-ia-content { font-size: 13px; line-height: 1.6; color: #334155; }
-                            .pdf-ia-content p { margin-top: 0; margin-bottom: 10px; }
-                            .pdf-ia-content ul { margin: 0 0 10px 0; padding-left: 20px; }
+                            .pdf-header { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); padding: 30px 40px; color: white; display: flex; justify-content: space-between; align-items: center; margin: -40px -40px 30px -40px; }
+                            .pdf-title-box h1 { margin: 0; color: #00e5ff; font-size: 28px; font-weight: 800; letter-spacing: -0.5px; }
+                            .pdf-title-box p { margin: 5px 0 0 0; color: #94a3b8; font-size: 13px; }
+                            .pdf-date { text-align: right; color: #64748b; font-size: 11px; line-height: 1.6; }
                             
-                            .pdf-section-title { font-size: 18px; font-weight: 700; color: #0f172a; margin: 0 0 15px 0; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; }
+                            .pdf-ia-box { background: linear-gradient(135deg, #f0f9ff 0%, #f8fafc 100%); border-left: 4px solid #0ea5e9; padding: 20px 25px; border-radius: 0 8px 8px 0; margin-bottom: 25px; }
+                            .pdf-ia-title { color: #0c4a6e; font-weight: 700; font-size: 14px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+                            .pdf-ia-content { font-size: 12px; line-height: 1.7; color: #334155; }
+                            .pdf-ia-content p { margin-top: 0; margin-bottom: 8px; }
+                            .pdf-ia-content ul { margin: 0 0 8px 0; padding-left: 18px; }
                             
-                            .pdf-cards { display: flex; gap: 20px; margin-bottom: 20px; }
-                            .pdf-card { flex: 1; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; }
-                            .pdf-card-title { font-size: 16px; font-weight: 700; margin: 0 0 15px 0; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; }
-                            .pdf-card-title.consorcio { color: #06b6d4; }
-                            .pdf-card-title.financiamento { color: #ef4444; }
-                            .pdf-row { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 8px; border-bottom: 1px dashed #f1f5f9; padding-bottom: 4px; }
-                            .pdf-row:last-child { border: none; }
-                            .pdf-row-label { font-weight: 600; color: #475569; }
-                            .pdf-row-val { color: #0f172a; }
-                            .pdf-total { margin-top: 15px; background: #f8fafc; padding: 10px; border-radius: 6px; display: flex; justify-content: space-between; font-weight: 700; font-size: 14px; color: #0f172a; }
+                            .pdf-section-title { font-size: 16px; font-weight: 700; color: #0f172a; margin: 0 0 15px 0; padding-bottom: 6px; border-bottom: 2px solid #0ea5e9; display: inline-block; }
+                            .pdf-section-wrap { margin-bottom: 20px; }
                             
-                            .pdf-verdict { background: #ecfdf5; border: 1px solid #10b981; border-radius: 8px; padding: 15px; text-align: center; margin-bottom: 30px; }
-                            .pdf-verdict-title { font-size: 11px; font-weight: 700; color: #047857; text-transform: uppercase; margin: 0 0 5px 0; }
-                            .pdf-verdict-val { font-size: 22px; font-weight: 800; color: #059669; margin: 0; }
+                            /* ─── Tabela Comparativa Técnica ─── */
+                            .pdf-comp-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 12px; }
+                            .pdf-comp-table th { background: #0f172a; color: #fff; padding: 10px 14px; text-align: center; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+                            .pdf-comp-table th:first-child { text-align: left; background: #1e293b; }
+                            .pdf-comp-table th.col-consorcio { background: #0e7490; }
+                            .pdf-comp-table th.col-financ { background: #be123c; }
+                            .pdf-comp-table td { padding: 9px 14px; border-bottom: 1px solid #e2e8f0; }
+                            .pdf-comp-table td:first-child { font-weight: 600; color: #475569; background: #f8fafc; }
+                            .pdf-comp-table td:nth-child(2) { text-align: center; color: #0e7490; font-weight: 600; }
+                            .pdf-comp-table td:nth-child(3) { text-align: center; color: #be123c; font-weight: 600; }
+                            .pdf-comp-table td:nth-child(4) { text-align: center; font-weight: 700; font-size: 11px; }
+                            .pdf-comp-table tr:last-child td { border-bottom: 2px solid #0f172a; }
+                            .tag-win { background: #dcfce7; color: #166534; padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; }
+                            .tag-loss { background: #fee2e2; color: #991b1b; padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; }
+                            .tag-neutral { background: #f1f5f9; color: #475569; padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; }
                             
-                            .pdf-chart { border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; text-align: center; margin-bottom: 20px; }
+                            /* ─── Card Solo Consórcio ─── */
+                            .pdf-card-solo { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 25px; max-width: 420px; margin: 0 auto 20px auto; }
+                            .pdf-card-solo h3 { color: #0e7490; font-size: 15px; margin: 0 0 15px 0; padding-bottom: 8px; border-bottom: 2px solid #0e7490; }
+                            .pdf-solo-row { display: flex; justify-content: space-between; font-size: 12px; padding: 7px 0; border-bottom: 1px dashed #e2e8f0; }
+                            .pdf-solo-row:last-of-type { border: none; }
+                            .pdf-solo-label { color: #475569; font-weight: 600; }
+                            .pdf-solo-val { color: #0f172a; font-weight: 500; }
+                            .pdf-solo-total { margin-top: 12px; background: linear-gradient(135deg, #0e7490, #0ea5e9); color: #fff; padding: 12px 16px; border-radius: 6px; display: flex; justify-content: space-between; font-weight: 700; font-size: 14px; }
+                            
+                            /* ─── Veredito ─── */
+                            .pdf-verdict { background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border: 1px solid #10b981; border-radius: 8px; padding: 18px; text-align: center; margin-bottom: 20px; }
+                            .pdf-verdict-title { font-size: 10px; font-weight: 700; color: #047857; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 5px 0; }
+                            .pdf-verdict-val { font-size: 24px; font-weight: 800; color: #059669; margin: 0; }
+                            .pdf-verdict-sub { font-size: 11px; color: #065f46; margin-top: 4px; }
+                            
+                            .pdf-chart { border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; text-align: center; margin-bottom: 20px; background: #fafbfc; }
                             .pdf-chart img { max-width: 100%; height: auto; max-height: 250px; }
+                            .pdf-chart-title { font-size: 12px; font-weight: 600; color: #475569; margin: 0 0 10px 0; text-transform: uppercase; letter-spacing: 0.5px; }
                             
-                            .pdf-footer { text-align: center; font-size: 10px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 15px; margin-top: 30px; }
+                            .pdf-footer { text-align: center; font-size: 9px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 15px; margin-top: 25px; line-height: 1.6; }
                         </style>
                     `;
 
                     // IA HTML
                     const iaHtml = iaText ? `
                         <div class="pdf-ia-box">
-                            <div class="pdf-ia-title">
-                                Parecer do Especialista (Inteligência Artificial)
-                            </div>
+                            <div class="pdf-ia-title">&#128300; Parecer Técnico — Inteligência Artificial</div>
                             <div class="pdf-ia-content">${iaText}</div>
                         </div>
                     ` : '';
 
-                    // Cards HTML
+                    // Cards / Tabela Comparativa HTML
                     let cardsHtml = '';
                     let verdictHtml = '';
 
                     if (isComparativo) {
+                        // Calcular indicadores técnicos
+                        const custoJurosF = state._finAtivo ? state._finAtivo.totalJuros : 0;
+                        const custoAdmC = state._lance ? (state._lance.totalAdmin + state._lance.totalReserva) : 0;
+                        const diffParcela = parcelaF - parcelaC;
+                        const diffTotal = totalF - totalC;
+                        const cetC = state._lance ? state._lance.cetConsorcio : 0;
+
+                        function tagResult(valC, valF, lowerWins = true) {
+                            if (lowerWins) {
+                                if (valC < valF) return '<span class="tag-win">&#10003; VANTAGEM</span>';
+                                if (valC > valF) return '<span class="tag-loss">&#10007; DESVANTAGEM</span>';
+                            } else {
+                                if (valC > valF) return '<span class="tag-win">&#10003; VANTAGEM</span>';
+                                if (valC < valF) return '<span class="tag-loss">&#10007; DESVANTAGEM</span>';
+                            }
+                            return '<span class="tag-neutral">= EQUIVALENTE</span>';
+                        }
+
                         cardsHtml = `
-                            <div class="pdf-cards">
-                                <div class="pdf-card">
-                                    <h3 class="pdf-card-title consorcio">Consórcio</h3>
-                                    <div class="pdf-row"><span class="pdf-row-label">Crédito:</span><span class="pdf-row-val">${fmtMoeda(valorBem)}</span></div>
-                                    <div class="pdf-row"><span class="pdf-row-label">Prazo:</span><span class="pdf-row-val">${prazoC} meses</span></div>
-                                    <div class="pdf-row"><span class="pdf-row-label">Taxa Adm.:</span><span class="pdf-row-val">${state.taxaAdmin}% total</span></div>
-                                    <div class="pdf-row"><span class="pdf-row-label">Parcela Mensal:</span><span class="pdf-row-val">${fmtMoeda(parcelaC)}</span></div>
-                                    <div class="pdf-total"><span>Custo Final:</span><span>${fmtMoeda(totalC)}</span></div>
-                                </div>
-                                <div class="pdf-card">
-                                    <h3 class="pdf-card-title financiamento">Financiamento Bancário</h3>
-                                    <div class="pdf-row"><span class="pdf-row-label">Crédito:</span><span class="pdf-row-val">${fmtMoeda(valorBem)}</span></div>
-                                    <div class="pdf-row"><span class="pdf-row-label">Prazo:</span><span class="pdf-row-val">${prazoF} meses</span></div>
-                                    <div class="pdf-row"><span class="pdf-row-label">Juros:</span><span class="pdf-row-val">${taxaJuros}% a.a.</span></div>
-                                    <div class="pdf-row"><span class="pdf-row-label">1ª Parcela:</span><span class="pdf-row-val">${fmtMoeda(parcelaF)}</span></div>
-                                    <div class="pdf-total"><span>Custo Final:</span><span>${fmtMoeda(totalF)}</span></div>
-                                </div>
-                            </div>
+                            <table class="pdf-comp-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 30%;">Indicador</th>
+                                        <th class="col-consorcio" style="width: 25%;">Consórcio</th>
+                                        <th class="col-financ" style="width: 25%;">Financiamento</th>
+                                        <th style="width: 20%;">Resultado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Crédito Contratado</td>
+                                        <td>${fmtMoeda(valorBem)}</td>
+                                        <td>${fmtMoeda(valorBem)}</td>
+                                        <td><span class="tag-neutral">= IGUAL</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Prazo da Operação</td>
+                                        <td>${prazoC} meses</td>
+                                        <td>${prazoF} meses</td>
+                                        <td>${tagResult(prazoC, prazoF)}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Parcela Mensal</td>
+                                        <td>${fmtMoeda(parcelaC)}</td>
+                                        <td>${fmtMoeda(parcelaF)}</td>
+                                        <td>${tagResult(parcelaC, parcelaF)}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Custo com Juros / Taxas</td>
+                                        <td>${fmtMoeda(custoAdmC)}</td>
+                                        <td>${fmtMoeda(custoJurosF)}</td>
+                                        <td>${tagResult(custoAdmC, custoJurosF)}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Taxa Efetiva (CET)</td>
+                                        <td>${Calculator.formatarNumero(cetC, 2)}%</td>
+                                        <td>${taxaJuros}% a.a.</td>
+                                        <td>${tagResult(cetC, taxaJuros)}</td>
+                                    </tr>
+                                    <tr style="background: #f8fafc; font-size: 13px;">
+                                        <td style="font-weight: 800; color: #0f172a;">CUSTO TOTAL FINAL</td>
+                                        <td style="font-size: 14px;">${fmtMoeda(totalC)}</td>
+                                        <td style="font-size: 14px;">${fmtMoeda(totalF)}</td>
+                                        <td>${tagResult(totalC, totalF)}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         `;
                         if (economia > 0) {
+                            const econPct = totalF > 0 ? ((economia / totalF) * 100).toFixed(1) : '0.0';
                             verdictHtml = `
                                 <div class="pdf-verdict">
-                                    <p class="pdf-verdict-title">Lucro / Economia Gerada no Consórcio</p>
+                                    <p class="pdf-verdict-title">Economia Total Projetada com o Consórcio</p>
                                     <p class="pdf-verdict-val">+ ${fmtMoeda(economia)}</p>
+                                    <p class="pdf-verdict-sub">Representa ${econPct}% de redução sobre o custo do financiamento</p>
                                 </div>
                             `;
                         }
                     } else {
                         cardsHtml = `
-                            <div class="pdf-cards" style="justify-content: center;">
-                                <div class="pdf-card" style="max-width: 400px;">
-                                    <h3 class="pdf-card-title consorcio">Plano Estruturado - Consórcio</h3>
-                                    <div class="pdf-row"><span class="pdf-row-label">Crédito (Capital):</span><span class="pdf-row-val">${fmtMoeda(valorBem)}</span></div>
-                                    <div class="pdf-row"><span class="pdf-row-label">Prazo do Grupo:</span><span class="pdf-row-val">${prazoC} meses</span></div>
-                                    <div class="pdf-row"><span class="pdf-row-label">Taxa Administrativa:</span><span class="pdf-row-val">${state.taxaAdmin}% total</span></div>
-                                    <div class="pdf-row"><span class="pdf-row-label">Lance Ofertado:</span><span class="pdf-row-val">${fmtMoeda(state.lanceProprio + state.lanceEmbutido)}</span></div>
-                                    <div class="pdf-row"><span class="pdf-row-label">Parcela Mensal:</span><span class="pdf-row-val">${fmtMoeda(parcelaC)}</span></div>
-                                    <div class="pdf-total"><span>Custo Total da Operação:</span><span>${fmtMoeda(totalC)}</span></div>
-                                </div>
+                            <div class="pdf-card-solo">
+                                <h3>Plano Estruturado — Consórcio</h3>
+                                <div class="pdf-solo-row"><span class="pdf-solo-label">Crédito (Capital):</span><span class="pdf-solo-val">${fmtMoeda(valorBem)}</span></div>
+                                <div class="pdf-solo-row"><span class="pdf-solo-label">Prazo do Grupo:</span><span class="pdf-solo-val">${prazoC} meses</span></div>
+                                <div class="pdf-solo-row"><span class="pdf-solo-label">Taxa Administrativa:</span><span class="pdf-solo-val">${state.taxaAdmin}% total</span></div>
+                                <div class="pdf-solo-row"><span class="pdf-solo-label">Lance Ofertado:</span><span class="pdf-solo-val">${fmtMoeda(state.lanceProprio + state.lanceEmbutido)}</span></div>
+                                <div class="pdf-solo-row"><span class="pdf-solo-label">Parcela Mensal:</span><span class="pdf-solo-val">${fmtMoeda(parcelaC)}</span></div>
+                                <div class="pdf-solo-total"><span>Custo Total da Operação:</span><span>${fmtMoeda(totalC)}</span></div>
                             </div>
                         `;
                     }
@@ -1073,35 +1133,38 @@
                     // Chart HTML
                     const chartHtml = chartImg ? `
                         <div class="pdf-chart">
-                            <h3 style="font-size: 14px; margin: 0 0 10px 0; color: #475569;">Evolução Financeira ao Longo do Tempo</h3>
-                            <img src="${chartImg}" alt="Gráfico">
+                            <p class="pdf-chart-title">Evolução Comparativa das Parcelas ao Longo do Tempo</p>
+                            <img src="${chartImg}" alt="Gráfico Comparativo">
                         </div>
                     ` : '';
 
                     const fullHtml = `
                         ${pdfCSS}
-                        <div class="pdf-wrapper">
+                        <div class="pdf-wrapper" style="font-family: 'Inter', 'Segoe UI', sans-serif;">
                             <div class="pdf-header">
                                 <div class="pdf-title-box">
                                     <h1>ConsórcioPro</h1>
-                                    <p>Apresentação Comercial de Viabilidade</p>
+                                    <p>Análise Técnica Comparativa de Viabilidade Financeira</p>
                                 </div>
                                 <div class="pdf-date">
                                     Data: ${new Date().toLocaleDateString('pt-BR')}<br>
-                                    Proposta Oficial
+                                    Documento Gerado por IA
                                 </div>
                             </div>
                             
                             ${iaHtml}
                             
-                            <h2 class="pdf-section-title">Resumo Financeiro da Operação</h2>
+                            <div class="pdf-section-wrap">
+                                <h2 class="pdf-section-title">${isComparativo ? 'Quadro Comparativo Técnico' : 'Resumo Financeiro da Operação'}</h2>
+                            </div>
                             ${cardsHtml}
                             ${verdictHtml}
                             ${chartHtml}
                             
                             <div class="pdf-footer">
-                                Este documento é uma simulação estratégica (Análise por IA) e não configura proposta oficial vinculativa.<br>
-                                Valores sujeitos a alteração conforme tabela da administradora e análise de crédito.
+                                Este documento constitui uma simulação estratégica gerada por inteligência artificial e não configura proposta oficial vinculativa.<br>
+                                Valores sujeitos a alteração conforme tabela da administradora, condições do grupo e análise de crédito.<br>
+                                ConsórcioPro &copy; ${new Date().getFullYear()} — Tecnologia aplicada ao planejamento financeiro.
                             </div>
                         </div>
                     `;
