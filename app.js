@@ -1128,16 +1128,23 @@
             });
         }
 
-        // Entrance animations
-        setTimeout(() => {
-            document.body.classList.add('loaded');
-        }, 100);
+    }
+
+    // Guarantee page is always visible, even if init() crashes
+    function safeStart() {
+        // Show body immediately
+        document.body.classList.add('loaded');
+        try {
+            init();
+        } catch (e) {
+            console.error('Erro ao inicializar app:', e);
+        }
     }
 
     // Start
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
+        document.addEventListener('DOMContentLoaded', safeStart);
     } else {
-        init();
+        safeStart();
     }
 })();
