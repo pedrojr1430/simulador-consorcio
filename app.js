@@ -940,7 +940,7 @@
                         <style>
                             * { margin: 0; padding: 0; box-sizing: border-box; }
                             body { font-family: 'Inter', 'Segoe UI', sans-serif; color: #1e293b; }
-                            .pdf-wrapper { padding: 40px; }
+                            .pdf-wrapper { padding: 25px; }
                             
                             .pdf-header { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); padding: 30px 40px; color: white; display: flex; justify-content: space-between; align-items: center; margin: -40px -40px 30px -40px; }
                             .pdf-title-box h1 { margin: 0; color: #00e5ff; font-size: 28px; font-weight: 800; letter-spacing: -0.5px; }
@@ -989,7 +989,7 @@
                             
 
                             
-                            .pdf-footer { text-align: center; font-size: 9px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 15px; margin-top: 25px; line-height: 1.6; }
+                            .pdf-footer { text-align: center; font-size: 9px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 10px; margin-top: 15px; line-height: 1.4; }
                         </style>
                     `;
 
