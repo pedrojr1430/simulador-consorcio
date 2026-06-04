@@ -1086,22 +1086,46 @@
                         }
                     } else {
                         cardsHtml = `
-                            <div class="pdf-card-solo">
-                                <h3>Plano Estruturado — Consórcio</h3>
-                                <div class="pdf-solo-row"><span class="pdf-solo-label">Crédito (Capital):</span><span class="pdf-solo-val">${fmtMoeda(valorBem)}</span></div>
-                                <div class="pdf-solo-row"><span class="pdf-solo-label">Prazo do Grupo:</span><span class="pdf-solo-val">${prazoC} meses</span></div>
-                                <div class="pdf-solo-row"><span class="pdf-solo-label">Taxa Administrativa:</span><span class="pdf-solo-val">${state.taxaAdmin}% total</span></div>
-                                <div class="pdf-solo-row"><span class="pdf-solo-label">Lance Ofertado:</span><span class="pdf-solo-val">${fmtMoeda(state._lance ? state._lance.totalLanceOfertado : 0)}</span></div>
-                                <div class="pdf-solo-row"><span class="pdf-solo-label">Parcela Mensal:</span><span class="pdf-solo-val">${fmtMoeda(parcelaC)}</span></div>
-                                <div class="pdf-solo-total"><span>Custo Total da Operação:</span><span>${fmtMoeda(totalC)}</span></div>
-                            </div>
+                            <table class="pdf-comp-table" style="max-width: 550px; margin: 0 auto 20px auto;">
+                                <thead>
+                                    <tr>
+                                        <th colspan="2" style="text-align: center; font-size: 14px; background: #0e7490;">Plano Estruturado — Consórcio</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Crédito (Capital)</td>
+                                        <td style="text-align: right; color: #0f172a; font-weight: 700;">${fmtMoeda(valorBem)}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Prazo do Grupo</td>
+                                        <td style="text-align: right; color: #0f172a; font-weight: 700;">${prazoC} meses</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Taxa Administrativa</td>
+                                        <td style="text-align: right; color: #0f172a; font-weight: 700;">${state.taxaAdmin}% total</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Lance Ofertado</td>
+                                        <td style="text-align: right; color: #0f172a; font-weight: 700;">${fmtMoeda(state._lance ? state._lance.totalLanceOfertado : 0)}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Parcela Mensal</td>
+                                        <td style="text-align: right; color: #0f172a; font-weight: 700;">${fmtMoeda(parcelaC)}</td>
+                                    </tr>
+                                    <tr style="background: linear-gradient(135deg, #0e7490, #0ea5e9);">
+                                        <td style="font-weight: 800; border: none; color: #fff; background: transparent;">Custo Total da Operação</td>
+                                        <td style="text-align: right; font-weight: 800; border: none; color: #fff; background: transparent;">${fmtMoeda(totalC)}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         `;
                     }
 
 
                     const fullHtml = `
                         ${pdfCSS}
-                        <div class="pdf-wrapper" style="font-family: 'Inter', 'Segoe UI', sans-serif;">
+                        <div class="pdf-wrapper" style="font-family: 'Inter', 'Segoe UI', sans-serif; max-width: 750px; margin: 0 auto; background: #fff; padding: 20px;">
                             <div class="pdf-header">
                                 <div class="pdf-title-box">
                                     <h1>ConsórcioPro</h1>
