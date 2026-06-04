@@ -916,9 +916,12 @@
                     pdfContainer.style.fontFamily = 'Inter, sans-serif';
                     pdfContainer.style.padding = '0';
                     pdfContainer.style.margin = '0';
-                    pdfContainer.style.position = 'absolute';
-                    pdfContainer.style.left = '-9999px';
-
+                    pdfContainer.style.position = 'fixed';
+                    pdfContainer.style.top = '0';
+                    pdfContainer.style.left = '0';
+                    pdfContainer.style.zIndex = '-9999';
+                    pdfContainer.style.opacity = '0';
+                    pdfContainer.style.pointerEvents = 'none';
                     // CSS Interno para o PDF
                     const pdfCSS = `
                         <style>
