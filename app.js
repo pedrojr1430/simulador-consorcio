@@ -1137,8 +1137,6 @@
                                 </div>
                             </div>
                             
-                            ${iaHtml}
-                            
                             <div class="pdf-section-wrap">
                                 <h2 class="pdf-section-title">${isComparativo ? 'Quadro Comparativo Técnico' : 'Resumo Financeiro da Operação'}</h2>
                             </div>
