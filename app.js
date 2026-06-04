@@ -1130,7 +1130,11 @@
                 valorParcela: Calculator.formatarMoeda(state._lance ? state._lance.novaParcela : 0),
                 prazo: state._lance ? state._lance.novoPrazo : 0,
                 lance: Calculator.formatarMoeda(state.lanceProprio + state.lanceEmbutido),
-                economiaTotal: economiaStr
+                economiaTotal: economiaStr,
+                parcelaFinanciamento: state._finAtivo && state._finAtivo.tabela && state._finAtivo.tabela[0] ? Calculator.formatarMoeda(state._finAtivo.tabela[0].parcela) : 'R$ 0,00',
+                prazoFinanciamento: state.prazoFinanciamento || 0,
+                totalConsorcio: Calculator.formatarMoeda(totalConsorcio),
+                totalFinanciamento: Calculator.formatarMoeda(totalFinanciamento)
             };
 
             try {

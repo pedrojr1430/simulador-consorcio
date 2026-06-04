@@ -11,7 +11,11 @@ export default async function handler(req, res) {
             valorParcela,
             economiaTotal,
             prazo,
-            lance
+            lance,
+            parcelaFinanciamento,
+            prazoFinanciamento,
+            totalConsorcio,
+            totalFinanciamento
         } = req.body;
 
         const openai = new OpenAI({
@@ -22,28 +26,28 @@ export default async function handler(req, res) {
         let prompt = '';
         
         // Verifica se é uma simulação comparativa com economia válida
-        // Vamos checar se "economiaTotal" é um valor monetário positivo, ignorando "R$ 0,00" ou negativos
         const isComparativo = economiaTotal && economiaTotal !== 'R$ 0,00' && !economiaTotal.includes('-');
 
         if (isComparativo) {
-            prompt = `Você é um consultor financeiro especialista em consórcios de alta performance.
-Um cliente fez uma simulação comparando consórcio com financiamento bancário:
-- Carta de Crédito: R$ ${valorCarta}
-- Parcela Mensal (Consórcio): R$ ${valorParcela}
-- Prazo: ${prazo} meses
+            prompt = `Você é um consultor financeiro especialista em consórcios e investimentos inteligentes.
+Faça a análise real de uma simulação financeira preenchida por um cliente, comparando o consórcio com o financiamento bancário tradicional:
+- Carta de Crédito (Valor do Bem): R$ ${valorCarta}
+- Consórcio: Parcela de R$ ${valorParcela} em ${prazo} meses (Custo Final: R$ ${totalConsorcio})
+- Financiamento: Parcela Inicial de R$ ${parcelaFinanciamento} em ${prazoFinanciamento} meses (Custo Final: R$ ${totalFinanciamento})
 - Lance Ofertado: R$ ${lance}
-- Economia Total (frente ao financiamento): R$ ${economiaTotal}
+- Economia Total Gerada: R$ ${economiaTotal}
 
-Escreva um roteiro de vendas persuasivo e direto (máximo 3 parágrafos curtos) para convencer o cliente de que o consórcio é a escolha mais inteligente, focando na gigantesca economia de R$ ${economiaTotal} em juros bancários. Use gatilhos de escassez e lógica. Vá direto ao ponto, sem saudações longas. Não use marcações markdown como asteriscos, pois será lido em voz alta.`;
+Com base NESSES DADOS REAIS, crie um roteiro de vendas (pitch) narrativo, direto e extremamente persuasivo (máximo 3 parágrafos). Destaque a diferença absurda entre o que ele pagaria de parcela no banco (R$ ${parcelaFinanciamento}) contra a parcela acessível do consórcio (R$ ${valorParcela}). Mostre a economia total de R$ ${economiaTotal} como lucro, dinheiro que fica no bolso dele. Use um tom empolgante, de quem está mostrando o segredo financeiro dos ricos. Não use asteriscos ou emojis, pois o texto será lido por uma voz gerada por IA.`;
         } else {
-            prompt = `Você é um consultor financeiro especialista em consórcios de alta performance.
-Um cliente fez uma simulação de consórcio focada em planejamento e inteligência financeira:
-- Carta de Crédito: R$ ${valorCarta}
-- Parcela Mensal: R$ ${valorParcela}
-- Prazo: ${prazo} meses
+            prompt = `Você é um consultor financeiro especialista em consórcios e construção de patrimônio.
+Faça a análise real de uma simulação de consórcio preenchida por um cliente (sem comparativo com financiamento):
+- Carta de Crédito (Patrimônio): R$ ${valorCarta}
+- Parcela Mensal Acessível: R$ ${valorParcela}
+- Prazo do Grupo: ${prazo} meses
+- Custo Total Final: R$ ${totalConsorcio}
 - Lance Ofertado: R$ ${lance}
 
-Escreva um roteiro de vendas persuasivo e animador (máximo 3 parágrafos curtos) ressaltando como essa parcela de R$ ${valorParcela} cabe no bolso e como o consórcio é a ferramenta perfeita para construção patrimonial sem pagar juros. Vá direto ao ponto, use um tom de autoridade e encorajamento. Não use marcações markdown como asteriscos, pois será lido em voz alta.`;
+Com base NESSES DADOS REAIS, crie um roteiro de vendas narrativo e persuasivo (máximo 3 parágrafos) focado em como o consórcio é a compra inteligente. Mostre que a parcela de R$ ${valorParcela} cabe com folga no orçamento para levantar um capital de R$ ${valorCarta}. Crie urgência (grupos em fechamento) e mostre que investir essa pequena parcela mensal é a ponte para a riqueza sem pagar juros bancários abusivos. Não use asteriscos ou emojis, pois o texto será lido por uma voz gerada por IA.`;
         }
 
         const chatCompletion = await openai.chat.completions.create({
