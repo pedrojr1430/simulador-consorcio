@@ -509,8 +509,8 @@
                     {
                         label: 'Consórcio',
                         data: consorcioData,
-                        borderColor: '#00ffff', 
-                        backgroundColor: '#00ffff',
+                        borderColor: '#2563eb', 
+                        backgroundColor: '#2563eb',
                         borderWidth: 0,
                         borderRadius: 4,
                         barPercentage: 0.8,
@@ -519,8 +519,8 @@
                     {
                         label: 'Financ. (Price)',
                         data: priceData,
-                        borderColor: '#ff0055', 
-                        backgroundColor: '#ff0055',
+                        borderColor: '#dc2626', 
+                        backgroundColor: '#dc2626',
                         borderWidth: 0,
                         borderRadius: 4,
                         barPercentage: 0.8,
@@ -529,8 +529,8 @@
                     {
                         label: 'Financ. (SAC)',
                         data: sacData,
-                        borderColor: '#ffea00', 
-                        backgroundColor: '#ffea00',
+                        borderColor: '#f59e0b', 
+                        backgroundColor: '#f59e0b',
                         borderWidth: 0,
                         borderRadius: 4,
                         barPercentage: 0.8,
@@ -976,7 +976,7 @@
                             .pdf-verdict-sub { font-size: 11px; color: #065f46; margin-top: 4px; }
                             
                             .pdf-chart { border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; text-align: center; margin-bottom: 20px; background: #fafbfc; page-break-inside: avoid; margin-top: 20px; }
-                            .pdf-chart img { max-width: 100%; height: auto; max-height: 250px; }
+                            .pdf-chart img { max-width: 100%; height: auto; max-height: 400px; }
                             .pdf-chart-title { font-size: 12px; font-weight: 600; color: #475569; margin: 0 0 10px 0; text-transform: uppercase; letter-spacing: 0.5px; }
                             
                             .pdf-footer { text-align: center; font-size: 9px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 15px; margin-top: 25px; line-height: 1.6; }
