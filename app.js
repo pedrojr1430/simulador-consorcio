@@ -509,8 +509,8 @@
                     {
                         label: 'Consórcio',
                         data: consorcioData,
-                        borderColor: '#2563eb', 
-                        backgroundColor: '#2563eb',
+                        borderColor: '#10b981', 
+                        backgroundColor: '#10b981',
                         borderWidth: 0,
                         borderRadius: 4,
                         barPercentage: 0.8,
@@ -519,8 +519,8 @@
                     {
                         label: 'Financ. (Price)',
                         data: priceData,
-                        borderColor: '#dc2626', 
-                        backgroundColor: '#dc2626',
+                        borderColor: '#ef4444', 
+                        backgroundColor: '#ef4444',
                         borderWidth: 0,
                         borderRadius: 4,
                         barPercentage: 0.8,
@@ -1090,6 +1090,7 @@
 
                     // Chart HTML
                     const chartHtml = chartImg ? `
+                        <div class="html2pdf__page-break"></div>
                         <div class="pdf-chart">
                             <p class="pdf-chart-title">Evolução Comparativa das Parcelas ao Longo do Tempo</p>
                             <img src="${chartImg}" alt="Gráfico Comparativo">
