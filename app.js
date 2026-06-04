@@ -535,8 +535,17 @@
 
         Chart.defaults.font.family = "'Inter', sans-serif";
 
+        let chartType = 'line';
+        if (canvasId === 'canvas-evolucao-main') {
+            const sel = $('#select-chart-type-main');
+            if (sel) chartType = sel.value;
+        } else if (canvasId === 'canvas-evolucao') {
+            const sel = $('#select-chart-type-evolucao');
+            if (sel) chartType = sel.value;
+        }
+
         chartInstances[canvasId] = new Chart(canvas, {
-            type: 'line', 
+            type: chartType, 
             data: {
                 labels: labels,
                 datasets: [
@@ -727,6 +736,42 @@
 
     // ── Slider sync ────────────────────────────────────────────
     function setupSliderSync() {
+        // Carta de Crédito slider
+        const sliderCarta = $('#slider-valor-carta');
+        if (sliderCarta && elValorCarta) {
+            sliderCarta.addEventListener('input', function () {
+                const val = parseFloat(this.value);
+                state.valorCarta = val;
+                elValorCarta.value = formatarEmTempoReal(val.toFixed(2).replace('.', ','));
+                recalcular();
+            });
+            elValorCarta.addEventListener('input', function () {
+                sliderCarta.value = state.valorCarta;
+            });
+        }
+
+        // Parcela Reversa slider
+        const sliderParcela = $('#slider-parcela-reversa');
+        if (sliderParcela) {
+            sliderParcela.addEventListener('input', function () {
+                const parcelaDesejada = parseFloat(this.value);
+                $('#label-slider-parcela').textContent = Calculator.formatarMoeda(parcelaDesejada);
+                
+                // Cálculo reverso: Parcela = (Valor * (1 + Taxa/100)) / Prazo
+                // Valor = (Parcela * Prazo) / (1 + Taxa/100)
+                const taxaTotalAdmin = (state.taxaAdmin || 0) + (state.fundoReserva || 0);
+                const prazo = state.prazo || 12;
+                
+                let novoValorCarta = (parcelaDesejada * prazo) / (1 + (taxaTotalAdmin / 100));
+                
+                state.valorCarta = novoValorCarta;
+                elValorCarta.value = formatarEmTempoReal(novoValorCarta.toFixed(2).replace('.', ','));
+                if (sliderCarta) sliderCarta.value = novoValorCarta;
+                
+                recalcular();
+            });
+        }
+
         // Consórcio prazo slider
         if (elSliderPrazo && elPrazo) {
             elSliderPrazo.addEventListener('input', function () {
@@ -753,14 +798,32 @@
         }
     }
 
+    // ── Chart Type Toggles ─────────────────────────────────────
+    function setupChartToggles() {
+        const selMain = $('#select-chart-type-main');
+        if (selMain) {
+            selMain.addEventListener('change', () => {
+                if ($('#canvas-evolucao-main')) drawEvolucaoChart('canvas-evolucao-main');
+            });
+        }
+        const selDashboard = $('#select-chart-type-evolucao');
+        if (selDashboard) {
+            selDashboard.addEventListener('change', () => {
+                if ($('#canvas-evolucao')) drawEvolucaoChart('canvas-evolucao');
+            });
+        }
+    }
+
     // ── Inicialização ──────────────────────────────────────────
     function init() {
-        // Setup currency inputs
+        setupNavigation();
+        setupAmortTable();
+        setupChartToggles();
+
         setupCurrencyInput(elValorCarta, 'valorCarta');
         setupCurrencyInput(elValorLanceProprio, 'lanceProprio');
         setupCurrencyInput(elValorLanceEmbutido, 'lanceEmbutido');
 
-        // Lance mode toggles (R$ / %)
         setupLanceModeToggle('#toggle-modo-lance-proprio', '#input-lance-proprio', '#prefix-lance-proprio', 'lanceProprio');
         setupLanceModeToggle('#toggle-modo-lance-embutido', '#input-lance-embutido', '#prefix-lance-embutido', 'lanceEmbutido');
 

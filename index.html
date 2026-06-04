@@ -74,6 +74,7 @@
                                 <span class="input-prefix">R$</span>
                                 <input type="text" id="input-valor-carta" value="" placeholder="0,00" inputmode="decimal" autocomplete="off">
                             </div>
+                            <input type="range" id="slider-valor-carta" min="10000" max="1000000" step="10000" value="0" class="range-slider" style="margin-top: 10px;">
                         </div>
                         <div class="input-group">
                             <label for="input-prazo">Prazo (meses)</label>
@@ -112,7 +113,17 @@
                             <div class="result-label" id="label-parcela-basica">Parcela Mensal Padrão</div>
                             <div class="result-value" id="valor-parcela-basica">R$ 0,00</div>
                             <div class="result-sub-value" id="ultima-parcela-basica" style="font-size: 0.85rem; opacity: 0.8; display: none;">Última est.: R$ 590,00</div>
-                            <div class="result-detail" id="detalhe-parcela-basica">
+                            
+                            <!-- SLIDER REVERSO (Ajustar Parcela) -->
+                            <div style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                                    <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,0.7);">Ajuste a Parcela Desejada</span>
+                                    <span id="label-slider-parcela" style="font-weight: bold; font-size: 0.9rem;">R$ 0,00</span>
+                                </div>
+                                <input type="range" id="slider-parcela-reversa" min="100" max="20000" step="50" value="0" class="range-slider" style="background: rgba(255,255,255,0.2);">
+                            </div>
+
+                            <div class="result-detail" id="detalhe-parcela-basica" style="margin-top: 10px;">
                                 Preencha os dados para simular
                             </div>
                         </div>
@@ -327,11 +338,17 @@
                 </div>
                 <!-- Card: Gráfico Dinâmico -->
                 <div class="glass-card card-chart card-chart-main" id="card-chart-main">
-                    <div class="card-header">
-                        <div class="card-icon purple">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div class="card-icon purple">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                            </div>
+                            <h2 style="margin: 0;">Evolução das Parcelas</h2>
                         </div>
-                        <h2>Evolução das Parcelas</h2>
+                        <select id="select-chart-type-main" style="padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border-light); background: rgba(255,255,255,0.05); color: var(--text-primary); font-size: 0.85rem; outline: none; cursor: pointer;">
+                            <option value="line">Gráfico de Linhas</option>
+                            <option value="bar">Gráfico de Barras</option>
+                        </select>
                     </div>
                     <div class="card-body">
                         <div class="chart-container" id="chart-main-container">
@@ -549,11 +566,17 @@
 
                 <!-- Chart: Evolução de Parcelas -->
                 <div class="glass-card card-chart" id="card-chart-evolucao">
-                    <div class="card-header">
-                        <div class="card-icon blue">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div class="card-icon blue">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                            </div>
+                            <h2 style="margin: 0;">Evolução das Parcelas</h2>
                         </div>
-                        <h2>Evolução das Parcelas</h2>
+                        <select id="select-chart-type-evolucao" style="padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border-light); background: rgba(255,255,255,0.05); color: var(--text-primary); font-size: 0.85rem; outline: none; cursor: pointer;">
+                            <option value="line">Gráfico de Linhas</option>
+                            <option value="bar">Gráfico de Barras</option>
+                        </select>
                     </div>
                     <div class="card-body">
                         <div class="chart-container" id="chart-evolucao">
