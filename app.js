@@ -515,9 +515,9 @@
         if (!canvas) return;
         
         // Pega os dados mais recentes do state (calculados no recalcular)
-        const { valorCarta, prazo, taxaAdmin, fundoReserva, taxaCorrecao, lanceProprio, lanceEmbutido, abatimento, taxaJuros, prazoFinanciamento } = state;
-        const lance = Calculator.calcularLance(valorCarta, taxaAdmin, fundoReserva, prazo, lanceProprio, lanceEmbutido, abatimento, taxaCorrecao);
-        const fin = Calculator.calcularFinanciamento(lance.cartaEfetiva, lanceProprio, taxaJuros, prazoFinanciamento);
+        const lance = state._lance;
+        const fin = state._fin;
+        if (!lance || !fin) return;
 
         const priceData = fin.price.tabela.map(r => r.parcela);
         const sacData = fin.sac.tabela.map(r => r.parcela);
@@ -552,38 +552,38 @@
                     {
                         label: 'Consórcio',
                         data: consorcioData,
-                        borderColor: '#06b6d4', 
-                        backgroundColor: '#06b6d4',
+                        borderColor: '#00e5ff', 
+                        backgroundColor: chartType === 'bar' ? '#00e5ff' : 'rgba(0, 229, 255, 0.15)',
                         borderWidth: 2,
                         tension: 0.4,
-                        fill: false,
+                        fill: chartType === 'line',
                         pointRadius: 0,
                         pointHoverRadius: 6,
-                        pointBackgroundColor: '#06b6d4'
+                        pointBackgroundColor: '#00e5ff'
                     },
                     {
                         label: 'Financ. (Price)',
                         data: priceData,
-                        borderColor: '#ef4444', 
-                        backgroundColor: '#ef4444',
+                        borderColor: '#ff3366', 
+                        backgroundColor: chartType === 'bar' ? '#ff3366' : 'rgba(255, 51, 102, 0.15)',
                         borderWidth: 2,
                         tension: 0.4,
-                        fill: false,
+                        fill: chartType === 'line',
                         pointRadius: 0,
                         pointHoverRadius: 6,
-                        pointBackgroundColor: '#ef4444'
+                        pointBackgroundColor: '#ff3366'
                     },
                     {
                         label: 'Financ. (SAC)',
                         data: sacData,
-                        borderColor: '#f59e0b', 
-                        backgroundColor: '#f59e0b',
+                        borderColor: '#ffaa00', 
+                        backgroundColor: chartType === 'bar' ? '#ffaa00' : 'rgba(255, 170, 0, 0.15)',
                         borderWidth: 2,
                         tension: 0.4,
-                        fill: false,
+                        fill: chartType === 'line',
                         pointRadius: 0,
                         pointHoverRadius: 6,
-                        pointBackgroundColor: '#f59e0b'
+                        pointBackgroundColor: '#ffaa00'
                     }
                 ]
             },
@@ -971,20 +971,7 @@
                     if (chartInstances['canvas-evolucao-main']) chartImg = chartInstances['canvas-evolucao-main'].toBase64Image('image/png', 1.0);
                     else if (chartInstances['canvas-evolucao']) chartImg = chartInstances['canvas-evolucao'].toBase64Image('image/png', 1.0);
 
-                    // Cria um container off-screen para o template PDF
-                    const pdfContainer = document.createElement('div');
-                    pdfContainer.style.width = '794px'; // Largura A4 padrão a 96 DPI
-                    pdfContainer.style.background = '#ffffff';
-                    pdfContainer.style.color = '#1e293b';
-                    pdfContainer.style.fontFamily = 'Inter, sans-serif';
-                    pdfContainer.style.padding = '0';
-                    pdfContainer.style.margin = '0';
-                    pdfContainer.style.position = 'fixed';
-                    pdfContainer.style.top = '0';
-                    pdfContainer.style.left = '0';
-                    pdfContainer.style.zIndex = '-9999';
-                    pdfContainer.style.opacity = '0';
-                    pdfContainer.style.pointerEvents = 'none';
+
                     // CSS Interno para o PDF
                     const pdfCSS = `
                         <style>
@@ -1119,10 +1106,7 @@
                         </div>
                     `;
 
-                    pdfContainer.innerHTML = fullHtml;
-                    document.body.appendChild(pdfContainer);
-
-                    // Gerar o PDF usando html2pdf
+                    // Gerar o PDF usando html2pdf usando a string HTML diretamente, sem mexer no DOM visível
                     const opt = {
                         margin:       0,
                         filename:     'Proposta_Comercial_ConsorcioPro.pdf',
@@ -1131,10 +1115,7 @@
                         jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
                     };
 
-                    await html2pdf().set(opt).from(pdfContainer).save();
-                    
-                    // Cleanup
-                    document.body.removeChild(pdfContainer);
+                    await html2pdf().set(opt).from(fullHtml).save();
 
                 } catch (err) {
                     console.error('Erro ao gerar PDF:', err);
