@@ -203,17 +203,7 @@
         });
     }
 
-    // ── Tabela de Amortização Toggle ───────────────────────────
-    function setupAmortTable() {
-        const btn = $('#btn-toggle-amort');
-        const body = $('#amort-table-body');
-        if (btn && body) {
-            btn.addEventListener('click', () => {
-                body.classList.toggle('collapsed');
-                btn.classList.toggle('rotated');
-            });
-        }
-    }
+
 
     // ── Motor de Recálculo Reativo ─────────────────────────────
     function recalcular() {
@@ -410,10 +400,8 @@
             $('#kpi-economia').classList.remove('positive');
         }
 
-        // 8. Tabela de Amortização
-        buildAmortTable(finAtivo.tabela);
-
-        // 9. Store calculated data for charts
+        if (finAtivo && finAtivo.tabela) {
+        }  // 9. Store calculated data for charts
         state._lance = lance;
         state._fin = fin;
         state._finAtivo = finAtivo;
@@ -461,30 +449,6 @@
         el.classList.remove('pulse');
         void el.offsetWidth; // force reflow
         el.classList.add('pulse');
-    }
-
-    // ── Tabela de Amortização ──────────────────────────────────
-    function buildAmortTable(tabela) {
-        const tbody = $('#amort-tbody');
-        if (!tbody || !tabela) return;
-
-        // Only show first 12, then every 12th, plus last
-        const rows = [];
-        for (let i = 0; i < tabela.length; i++) {
-            if (i < 12 || i % 12 === 0 || i === tabela.length - 1) {
-                rows.push(tabela[i]);
-            }
-        }
-
-        tbody.innerHTML = rows.map(r => `
-            <tr>
-                <td>${r.mes}</td>
-                <td>${Calculator.formatarMoeda(r.parcela)}</td>
-                <td>${Calculator.formatarMoeda(r.juros)}</td>
-                <td>${Calculator.formatarMoeda(r.amortizacao)}</td>
-                <td>${Calculator.formatarMoeda(r.saldoDevedor)}</td>
-            </tr>
-        `).join('');
     }
 
     // ── Gráficos (Chart.js) ────────────────────────────────────
@@ -545,38 +509,32 @@
                     {
                         label: 'Consórcio',
                         data: consorcioData,
-                        borderColor: '#00e5ff', 
-                        backgroundColor: chartType === 'bar' ? '#00e5ff' : 'rgba(0, 229, 255, 0.15)',
-                        borderWidth: 2,
-                        tension: 0.4,
-                        fill: chartType === 'line',
-                        pointRadius: 0,
-                        pointHoverRadius: 6,
-                        pointBackgroundColor: '#00e5ff'
+                        borderColor: '#00ffff', 
+                        backgroundColor: '#00ffff',
+                        borderWidth: 0,
+                        borderRadius: 4,
+                        barPercentage: 0.8,
+                        categoryPercentage: 0.9
                     },
                     {
                         label: 'Financ. (Price)',
                         data: priceData,
-                        borderColor: '#ff3366', 
-                        backgroundColor: chartType === 'bar' ? '#ff3366' : 'rgba(255, 51, 102, 0.15)',
-                        borderWidth: 2,
-                        tension: 0.4,
-                        fill: chartType === 'line',
-                        pointRadius: 0,
-                        pointHoverRadius: 6,
-                        pointBackgroundColor: '#ff3366'
+                        borderColor: '#ff0055', 
+                        backgroundColor: '#ff0055',
+                        borderWidth: 0,
+                        borderRadius: 4,
+                        barPercentage: 0.8,
+                        categoryPercentage: 0.9
                     },
                     {
                         label: 'Financ. (SAC)',
                         data: sacData,
-                        borderColor: '#ffaa00', 
-                        backgroundColor: chartType === 'bar' ? '#ffaa00' : 'rgba(255, 170, 0, 0.15)',
-                        borderWidth: 2,
-                        tension: 0.4,
-                        fill: chartType === 'line',
-                        pointRadius: 0,
-                        pointHoverRadius: 6,
-                        pointBackgroundColor: '#ffaa00'
+                        borderColor: '#ffea00', 
+                        backgroundColor: '#ffea00',
+                        borderWidth: 0,
+                        borderRadius: 4,
+                        barPercentage: 0.8,
+                        categoryPercentage: 0.9
                     }
                 ]
             },
@@ -1012,12 +970,12 @@
                             .pdf-solo-total { margin-top: 12px; background: linear-gradient(135deg, #0e7490, #0ea5e9); color: #fff; padding: 12px 16px; border-radius: 6px; display: flex; justify-content: space-between; font-weight: 700; font-size: 14px; }
                             
                             /* ─── Veredito ─── */
-                            .pdf-verdict { background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border: 1px solid #10b981; border-radius: 8px; padding: 18px; text-align: center; margin-bottom: 20px; }
+                            .pdf-verdict { background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border: 1px solid #10b981; border-radius: 8px; padding: 18px; text-align: center; margin-bottom: 20px; page-break-inside: avoid; }
                             .pdf-verdict-title { font-size: 10px; font-weight: 700; color: #047857; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 5px 0; }
                             .pdf-verdict-val { font-size: 24px; font-weight: 800; color: #059669; margin: 0; }
                             .pdf-verdict-sub { font-size: 11px; color: #065f46; margin-top: 4px; }
                             
-                            .pdf-chart { border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; text-align: center; margin-bottom: 20px; background: #fafbfc; }
+                            .pdf-chart { border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; text-align: center; margin-bottom: 20px; background: #fafbfc; page-break-inside: avoid; margin-top: 20px; }
                             .pdf-chart img { max-width: 100%; height: auto; max-height: 250px; }
                             .pdf-chart-title { font-size: 12px; font-weight: 600; color: #475569; margin: 0 0 10px 0; text-transform: uppercase; letter-spacing: 0.5px; }
                             
@@ -1171,11 +1129,12 @@
 
                     // Gerar o PDF usando html2pdf usando a string HTML diretamente, sem mexer no DOM visível
                     const opt = {
-                        margin:       0,
+                        margin:       [10, 0, 10, 0],
                         filename:     'Proposta_Comercial_ConsorcioPro.pdf',
                         image:        { type: 'jpeg', quality: 0.98 },
                         html2canvas:  { scale: 2, useCORS: true },
-                        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                        pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
                     };
 
                     await html2pdf().set(opt).from(fullHtml).save();
