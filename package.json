@@ -2,6 +2,9 @@
   "name": "simulador-consorcio",
   "version": "1.0.0",
   "description": "Simulador Avançado",
+  "scripts": {
+    "build": "echo \"No build step needed\""
+  },
   "dependencies": {
     "openai": "^4.28.0"
   }
