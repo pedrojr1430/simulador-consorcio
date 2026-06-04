@@ -78,6 +78,11 @@
         if (!input) return;
 
         input.addEventListener('input', function () {
+            if (lanceModes[stateKey] === 'pct') {
+                state[stateKey] = parseFloat(this.value.replace(',', '.')) || 0;
+                recalcular();
+                return;
+            }
             const formatted = formatarEmTempoReal(this.value);
             // Salvar posição do cursor
             this.value = formatted;
@@ -902,7 +907,8 @@
                     const prazoC = state._lance ? state._lance.novoPrazo : state.prazo;
                     const prazoF = state.prazoFinanciamento || 0;
                     
-                    const isComparativo = (totalF > 0);
+                    // Só é comparativo se o usuário preencheu ativamente os dados do financiamento
+                    const isComparativo = (prazoF > 0 && state.taxaJuros > 0);
 
                     // ═══════════════════════════════════════
                     // CABEÇALHO
@@ -1052,12 +1058,15 @@
                     if (chartInstances['canvas-evolucao-main']) chartBase64 = chartInstances['canvas-evolucao-main'].toBase64Image('image/png', 1.0);
                     else if (chartInstances['canvas-evolucao']) chartBase64 = chartInstances['canvas-evolucao'].toBase64Image('image/png', 1.0);
 
-                    if (chartBase64 && y < 220) {
+                    if (chartBase64 && y < 180) {
                         doc.setDrawColor(226, 232, 240);
-                        doc.roundedRect(mx, y, cw, 60, 3, 3, 'S');
+                        doc.roundedRect(mx, y, cw, 95, 3, 3, 'S');
                         doc.setFontSize(10); doc.setFont('helvetica', 'bold'); doc.setTextColor(51, 65, 85);
-                        doc.text('Evolução das Parcelas ao Longo do Tempo', mx + cw / 2, y + 7, { align: 'center' });
-                        try { doc.addImage(chartBase64, 'PNG', mx + 5, y + 10, cw - 10, 45); } catch(e) {}
+                        doc.text('Evolução Financeira ao Longo do Tempo', mx + cw / 2, y + 8, { align: 'center' });
+                        try { 
+                            // Mantendo a proporção 2:1 para evitar achatamento
+                            doc.addImage(chartBase64, 'PNG', mx + 5, y + 12, cw - 10, (cw - 10) / 2); 
+                        } catch(e) {}
                     }
 
                     // ── RODAPÉ ──
