@@ -108,7 +108,7 @@
     }
 
     // ── Modos de Lance (R$ / %) ───────────────────────────────
-    const lanceModes = { lanceProprio: 'valor', lanceEmbutido: 'valor' };
+    const lanceModes = { lanceProprio: 'pct', lanceEmbutido: 'pct' };
 
     function setupLanceModeToggle(toggleId, inputId, prefixId, stateKey) {
         const toggle = $(toggleId);
