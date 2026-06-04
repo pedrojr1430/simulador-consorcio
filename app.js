@@ -1104,18 +1104,11 @@
         });
 
         window.triggerChatbotIfNeeded = function() {
-            // Só dispara se houver economia positiva pro consórcio e ainda não foi gerado
+            // Apenas acende um brilho no botão caso haja simulação pronta
             if (hasGenerated) return;
-            const totalConsorcio = state._lance ? state._lance.totalPago : 0;
-            const totalFinanciamento = state._finAtivo ? state._finAtivo.totalPago : 0;
-            const economia = totalFinanciamento - totalConsorcio;
-
-            if (economia > 0 && state.valorCarta > 0) {
-                setTimeout(() => {
-                    floatBtn.classList.add('hidden');
-                    chatbot.classList.remove('hidden');
-                    generatePitch();
-                }, 1500); // Aguarda 1.5s após abrir o dashboard
+            const floatBtn = $('#btn-chatbot-float');
+            if (floatBtn) {
+                floatBtn.classList.add('pulse');
             }
         };
 
@@ -1129,12 +1122,15 @@
             const totalFinanciamento = state._finAtivo ? state._finAtivo.totalPago : 0;
             const economia = totalFinanciamento - totalConsorcio;
 
+            // Define se a economia é aplicável ou se enviará zerado para o modo isolado
+            const economiaStr = economia > 0 ? Calculator.formatarMoeda(economia) : 'R$ 0,00';
+
             const payload = {
-                valorCarta: Calculator.formatarMoeda(state.valorCarta),
-                valorParcela: Calculator.formatarMoeda(state._lance.novaParcela),
-                prazo: state._lance.novoPrazo,
+                valorCarta: Calculator.formatarMoeda(state.valorCarta || 0),
+                valorParcela: Calculator.formatarMoeda(state._lance ? state._lance.novaParcela : 0),
+                prazo: state._lance ? state._lance.novoPrazo : 0,
                 lance: Calculator.formatarMoeda(state.lanceProprio + state.lanceEmbutido),
-                economiaTotal: Calculator.formatarMoeda(economia)
+                economiaTotal: economiaStr
             };
 
             try {
@@ -1155,7 +1151,6 @@
                 if (data.audio) {
                     audioContainer.style.display = 'block';
                     audio.src = data.audio;
-                    // Tenta tocar automaticamente (o navegador pode bloquear se o usuário não interagiu muito)
                     audio.play().catch(e => console.log('Autoplay do áudio bloqueado pelo navegador.'));
                 }
 
@@ -1163,8 +1158,6 @@
                 console.error(err);
                 status.innerHTML = 'Houve um erro de comunicação com a IA.';
                 setTimeout(() => {
-                    chatbot.classList.add('hidden');
-                    floatBtn.classList.remove('hidden');
                     hasGenerated = false;
                 }, 3000);
             }

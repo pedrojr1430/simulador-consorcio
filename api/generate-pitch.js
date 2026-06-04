@@ -19,15 +19,32 @@ export default async function handler(req, res) {
         });
 
         // 1. Gerar o texto persuasivo (Pitch de Vendas)
-        const prompt = `Você é um consultor financeiro especialista em consórcios de alta performance.
-Um cliente acabou de fazer uma simulação com os seguintes dados:
+        let prompt = '';
+        
+        // Verifica se é uma simulação comparativa com economia válida
+        // Vamos checar se "economiaTotal" é um valor monetário positivo, ignorando "R$ 0,00" ou negativos
+        const isComparativo = economiaTotal && economiaTotal !== 'R$ 0,00' && !economiaTotal.includes('-');
+
+        if (isComparativo) {
+            prompt = `Você é um consultor financeiro especialista em consórcios de alta performance.
+Um cliente fez uma simulação comparando consórcio com financiamento bancário:
+- Carta de Crédito: R$ ${valorCarta}
+- Parcela Mensal (Consórcio): R$ ${valorParcela}
+- Prazo: ${prazo} meses
+- Lance Ofertado: R$ ${lance}
+- Economia Total (frente ao financiamento): R$ ${economiaTotal}
+
+Escreva um roteiro de vendas persuasivo e direto (máximo 3 parágrafos curtos) para convencer o cliente de que o consórcio é a escolha mais inteligente, focando na gigantesca economia de R$ ${economiaTotal} em juros bancários. Use gatilhos de escassez e lógica. Vá direto ao ponto, sem saudações longas. Não use marcações markdown como asteriscos, pois será lido em voz alta.`;
+        } else {
+            prompt = `Você é um consultor financeiro especialista em consórcios de alta performance.
+Um cliente fez uma simulação de consórcio focada em planejamento e inteligência financeira:
 - Carta de Crédito: R$ ${valorCarta}
 - Parcela Mensal: R$ ${valorParcela}
 - Prazo: ${prazo} meses
 - Lance Ofertado: R$ ${lance}
-- Economia Total (comparado a um financiamento): R$ ${economiaTotal}
 
-Escreva um roteiro de vendas persuasivo, direto e impactante (no máximo 3 parágrafos curtos) para convencer o cliente de que o consórcio é a melhor escolha, focando na economia gigantesca de R$ ${economiaTotal}. Não use saudações longas, vá direto ao ponto. Use gatilhos mentais de escassez e lógica. Não coloque marcações de markdown como asteriscos, pois isso será lido em voz alta por um sistema de áudio.`;
+Escreva um roteiro de vendas persuasivo e animador (máximo 3 parágrafos curtos) ressaltando como essa parcela de R$ ${valorParcela} cabe no bolso e como o consórcio é a ferramenta perfeita para construção patrimonial sem pagar juros. Vá direto ao ponto, use um tom de autoridade e encorajamento. Não use marcações markdown como asteriscos, pois será lido em voz alta.`;
+        }
 
         const chatCompletion = await openai.chat.completions.create({
             messages: [{ role: 'user', content: prompt }],
