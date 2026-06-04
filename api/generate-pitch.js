@@ -15,7 +15,8 @@ export default async function handler(req, res) {
             parcelaFinanciamento,
             prazoFinanciamento,
             totalConsorcio,
-            totalFinanciamento
+            totalFinanciamento,
+            isComparativo
         } = req.body;
 
         const openai = new OpenAI({
@@ -25,34 +26,42 @@ export default async function handler(req, res) {
         // 1. Gerar o texto persuasivo (Parecer do Especialista)
         let prompt = '';
         
-        const isComparativo = economiaTotal && economiaTotal !== 'R$ 0,00' && !economiaTotal.includes('-');
-
         if (isComparativo) {
-            prompt = `Você é um Consultor Sênior de Investimentos redigindo um "Parecer do Especialista" formal e altamente persuasivo que será incluído na proposta comercial oficial (em PDF) de um cliente.
+            prompt = `Você é um Consultor Sênior de Investimentos redigindo um "Parecer do Especialista" técnico e analítico para uma proposta comercial oficial.
 DADOS DA OPERAÇÃO (Comparativo):
 - Carta de Crédito (Imóvel/Veículo): R$ ${valorCarta}
-- Consórcio: Parcela acessível de R$ ${valorParcela} em ${prazo} meses (Custo Final Total: R$ ${totalConsorcio})
-- Financiamento Bancário Tradicional: Parcela Inicial pesada de R$ ${parcelaFinanciamento} em ${prazoFinanciamento} meses (Custo Final Total: R$ ${totalFinanciamento})
+- Consórcio: Parcela de R$ ${valorParcela} em ${prazo} meses (Custo Final: R$ ${totalConsorcio})
+- Financiamento Bancário: Parcela Inicial de R$ ${parcelaFinanciamento} em ${prazoFinanciamento} meses (Custo Final: R$ ${totalFinanciamento})
 - Lance Ofertado: R$ ${lance}
-- Economia Comprovada (Seu Lucro): R$ ${economiaTotal}
+- Economia Gerada: R$ ${economiaTotal}
 
-Com base nesses dados, escreva um texto elegante, profissional e direto (exatamente 2 a 3 parágrafos). Destaque a diferença absurda entre o juros do banco (que gera a parcela de R$ ${parcelaFinanciamento}) e o poder do consórcio de alavancar o patrimônio gerando uma economia massiva de R$ ${economiaTotal}. O tom deve ser formal de negócio, encorajador, e deixar claro que a decisão pelo consórcio é a única logicamente aceitável para quem tem inteligência financeira. Não use saudações, vá direto ao parecer.`;
+REGRAS OBRIGATÓRIAS:
+1. O texto deve ser formatado em HTML (use apenas <p>, <strong>, <ul> e <li>). NÃO USE MARKDOWN (*** ou ###).
+2. Escreva 3 parágrafos curtos ou tópicos.
+3. Use um tom estritamente profissional, técnico e corporativo.
+4. Compare diretamente o desperdício de capital do financiamento bancário (citando os R$ ${totalFinanciamento} e a parcela absurda de R$ ${parcelaFinanciamento}) com a inteligência financeira do consórcio.
+5. Evidencie que a economia de R$ ${economiaTotal} representa proteção patrimonial e custo de oportunidade.`;
         } else {
-            prompt = `Você é um Consultor Sênior de Investimentos redigindo um "Parecer do Especialista" formal e altamente persuasivo que será incluído na proposta comercial oficial (em PDF) de um cliente.
-DADOS DA OPERAÇÃO (Consórcio Individual):
+            prompt = `Você é um Consultor Sênior de Investimentos redigindo um "Parecer do Especialista" técnico e analítico para uma proposta comercial oficial.
+DADOS DA OPERAÇÃO (Consórcio):
 - Carta de Crédito (Construção de Patrimônio): R$ ${valorCarta}
 - Parcela Mensal Planejada: R$ ${valorParcela}
 - Prazo Estratégico: ${prazo} meses
 - Custo Final Total da Operação: R$ ${totalConsorcio}
 - Lance Ofertado Estratégico: R$ ${lance}
 
-Com base nesses dados, escreva um texto elegante, profissional e direto (exatamente 2 a 3 parágrafos). Enfatize como a parcela de R$ ${valorParcela} é um investimento poderoso e blindado contra juros abusivos. Mostre que levantar um capital de R$ ${valorCarta} pagando apenas as baixas taxas do consórcio é o verdadeiro segredo para a construção sólida de riqueza. O tom deve ser formal, demonstrando autoridade, criando urgência para a tomada de decisão. Não use saudações, vá direto ao parecer.`;
+REGRAS OBRIGATÓRIAS:
+1. O texto deve ser formatado em HTML (use apenas <p>, <strong>, <ul> e <li>). NÃO USE MARKDOWN (*** ou ###).
+2. Escreva 3 parágrafos curtos ou tópicos.
+3. Use um tom estritamente profissional, técnico e corporativo focando em planejamento financeiro.
+4. É ESTRITAMENTE PROIBIDO mencionar ou usar as palavras "financiamento" ou "banco". Fale APENAS sobre a operação estruturada via consórcio.
+5. Enfatize como levantar um capital de R$ ${valorCarta} pagando apenas as taxas administrativas (custo final de R$ ${totalConsorcio}) é a maneira mais eficiente de construir riqueza e blindar o patrimônio.`;
         }
 
         const chatCompletion = await openai.chat.completions.create({
             messages: [{ role: 'user', content: prompt }],
             model: 'gpt-4o-mini',
-            max_tokens: 300,
+            max_tokens: 400,
             temperature: 0.7,
         });
 

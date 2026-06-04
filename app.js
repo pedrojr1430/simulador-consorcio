@@ -870,7 +870,8 @@
                         parcelaFinanciamento: state._finAtivo && state._finAtivo.tabela && state._finAtivo.tabela[0] ? Calculator.formatarMoeda(state._finAtivo.tabela[0].parcela) : 'R$ 0,00',
                         prazoFinanciamento: state.prazoFinanciamento || 0,
                         totalConsorcio: Calculator.formatarMoeda(totalConsorcio),
-                        totalFinanciamento: Calculator.formatarMoeda(totalFinanciamento)
+                        totalFinanciamento: Calculator.formatarMoeda(totalFinanciamento),
+                        isComparativo: (state.prazoFinanciamento > 0 && state.taxaJuros > 0)
                     };
 
                     let iaText = '';
@@ -888,17 +889,9 @@
                         console.error('Falha ao comunicar com IA', e);
                     }
 
-                    // ── 2. GERAR O PDF ──
-                    const { jsPDF } = window.jspdf;
-                    const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
-                    const pw = 210; // largura A4
-                    const mx = 20;  // margem lateral
-                    const cw = pw - mx * 2; // largura útil = 170mm
-                    let y = 20; // cursor vertical
-
+                    // ── 2. GERAR O PDF VIA HTML2PDF ──
                     const fmtMoeda = (v) => Calculator.formatarMoeda(v);
 
-                    // ── Dados Básicos ──
                     const valorBem = state._lance ? state._lance.cartaEfetiva : state.valorCarta;
                     const parcelaC = state._lance ? state._lance.novaParcela : 0;
                     const totalC = state._lance ? state._lance.totalPago : 0;
@@ -906,176 +899,176 @@
                     const parcelaF = state._finAtivo ? (state._finAtivo.tabela[0]?.parcela || 0) : 0;
                     const prazoC = state._lance ? state._lance.novoPrazo : state.prazo;
                     const prazoF = state.prazoFinanciamento || 0;
+                    const taxaJuros = state.taxaJuros || 0;
                     
-                    // Só é comparativo se o usuário preencheu ativamente os dados do financiamento
-                    const isComparativo = (prazoF > 0 && state.taxaJuros > 0);
+                    const isComparativo = (prazoF > 0 && taxaJuros > 0);
 
-                    // ═══════════════════════════════════════
-                    // CABEÇALHO
-                    // ═══════════════════════════════════════
-                    doc.setFillColor(15, 23, 42);
-                    doc.rect(0, 0, pw, 40, 'F');
-                    
-                    doc.setFontSize(24);
-                    doc.setFont('helvetica', 'bold');
-                    doc.setTextColor(6, 182, 212); // cyan
-                    doc.text('ConsórcioPro', mx, 22);
+                    // Pega o gráfico
+                    let chartImg = '';
+                    if (chartInstances['canvas-evolucao-main']) chartImg = chartInstances['canvas-evolucao-main'].toBase64Image('image/png', 1.0);
+                    else if (chartInstances['canvas-evolucao']) chartImg = chartInstances['canvas-evolucao'].toBase64Image('image/png', 1.0);
 
-                    doc.setFontSize(11);
-                    doc.setFont('helvetica', 'normal');
-                    doc.setTextColor(255, 255, 255);
-                    doc.text('Apresentação Comercial de Viabilidade', mx, 30);
+                    // Cria um container off-screen para o template PDF
+                    const pdfContainer = document.createElement('div');
+                    pdfContainer.style.width = '794px'; // Largura A4 padrão a 96 DPI
+                    pdfContainer.style.background = '#ffffff';
+                    pdfContainer.style.color = '#1e293b';
+                    pdfContainer.style.fontFamily = 'Inter, sans-serif';
+                    pdfContainer.style.padding = '0';
+                    pdfContainer.style.margin = '0';
+                    pdfContainer.style.position = 'absolute';
+                    pdfContainer.style.left = '-9999px';
 
-                    doc.setFontSize(9);
-                    doc.setTextColor(148, 163, 184);
-                    doc.text(new Date().toLocaleDateString('pt-BR'), mx + cw, 22, { align: 'right' });
-                    doc.text('Proposta Oficial', mx + cw, 28, { align: 'right' });
+                    // CSS Interno para o PDF
+                    const pdfCSS = `
+                        <style>
+                            .pdf-wrapper { padding: 40px; box-sizing: border-box; }
+                            .pdf-header { background: #0f172a; padding: 30px 40px; color: white; display: flex; justify-content: space-between; align-items: center; margin: -40px -40px 30px -40px; }
+                            .pdf-title-box h1 { margin: 0; color: #06b6d4; font-size: 28px; font-weight: 800; }
+                            .pdf-title-box p { margin: 5px 0 0 0; color: #e2e8f0; font-size: 14px; }
+                            .pdf-date { text-align: right; color: #94a3b8; font-size: 12px; }
+                            
+                            .pdf-ia-box { background: #f8fafc; border-left: 4px solid #06b6d4; padding: 20px 25px; border-radius: 0 8px 8px 0; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
+                            .pdf-ia-title { color: #0f172a; font-weight: 700; font-size: 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+                            .pdf-ia-content { font-size: 13px; line-height: 1.6; color: #334155; }
+                            .pdf-ia-content p { margin-top: 0; margin-bottom: 10px; }
+                            .pdf-ia-content ul { margin: 0 0 10px 0; padding-left: 20px; }
+                            
+                            .pdf-section-title { font-size: 18px; font-weight: 700; color: #0f172a; margin: 0 0 15px 0; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; }
+                            
+                            .pdf-cards { display: flex; gap: 20px; margin-bottom: 20px; }
+                            .pdf-card { flex: 1; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; }
+                            .pdf-card-title { font-size: 16px; font-weight: 700; margin: 0 0 15px 0; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; }
+                            .pdf-card-title.consorcio { color: #06b6d4; }
+                            .pdf-card-title.financiamento { color: #ef4444; }
+                            .pdf-row { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 8px; border-bottom: 1px dashed #f1f5f9; padding-bottom: 4px; }
+                            .pdf-row:last-child { border: none; }
+                            .pdf-row-label { font-weight: 600; color: #475569; }
+                            .pdf-row-val { color: #0f172a; }
+                            .pdf-total { margin-top: 15px; background: #f8fafc; padding: 10px; border-radius: 6px; display: flex; justify-content: space-between; font-weight: 700; font-size: 14px; color: #0f172a; }
+                            
+                            .pdf-verdict { background: #ecfdf5; border: 1px solid #10b981; border-radius: 8px; padding: 15px; text-align: center; margin-bottom: 30px; }
+                            .pdf-verdict-title { font-size: 11px; font-weight: 700; color: #047857; text-transform: uppercase; margin: 0 0 5px 0; }
+                            .pdf-verdict-val { font-size: 22px; font-weight: 800; color: #059669; margin: 0; }
+                            
+                            .pdf-chart { border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; text-align: center; margin-bottom: 20px; }
+                            .pdf-chart img { max-width: 100%; height: auto; max-height: 250px; }
+                            
+                            .pdf-footer { text-align: center; font-size: 10px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 15px; margin-top: 30px; }
+                        </style>
+                    `;
 
-                    y = 50;
+                    // IA HTML
+                    const iaHtml = iaText ? `
+                        <div class="pdf-ia-box">
+                            <div class="pdf-ia-title">
+                                Parecer do Especialista (Inteligência Artificial)
+                            </div>
+                            <div class="pdf-ia-content">${iaText}</div>
+                        </div>
+                    ` : '';
 
-                    // ═══════════════════════════════════════
-                    // PARECER DO ESPECIALISTA (IA)
-                    // ═══════════════════════════════════════
-                    if (iaText) {
-                        doc.setFillColor(240, 244, 252);
-                        doc.setDrawColor(219, 234, 254);
-                        doc.setLineWidth(0.5);
-                        doc.roundedRect(mx, y, cw, 60, 3, 3, 'FD');
-
-                        doc.setFontSize(11);
-                        doc.setFont('helvetica', 'bold');
-                        doc.setTextColor(30, 58, 138);
-                        doc.text('Parecer do Especialista (Inteligência Artificial)', mx + 5, y + 8);
-
-                        doc.setFontSize(9);
-                        doc.setFont('helvetica', 'normal');
-                        doc.setTextColor(51, 65, 85);
-                        
-                        // Quebrar o texto longo em linhas que cabem na caixa
-                        const splitText = doc.splitTextToSize(iaText, cw - 10);
-                        doc.text(splitText, mx + 5, y + 16);
-
-                        y += 68;
-                    }
-
-                    // ═══════════════════════════════════════
-                    // CARTÕES FINANCEIROS
-                    // ═══════════════════════════════════════
-                    doc.setFontSize(14);
-                    doc.setFont('helvetica', 'bold');
-                    doc.setTextColor(15, 23, 42);
-                    doc.text('Resumo Financeiro da Operação', mx, y);
-                    y += 6;
+                    // Cards HTML
+                    let cardsHtml = '';
+                    let verdictHtml = '';
 
                     if (isComparativo) {
-                        const cardW = (cw - 6) / 2;
-                        const cardH = 58;
-                        const cardX1 = mx;
-                        const cardX2 = mx + cardW + 6;
-
-                        doc.setFillColor(248, 250, 252);
-                        doc.setDrawColor(226, 232, 240);
-                        doc.roundedRect(cardX1, y, cardW, cardH, 3, 3, 'FD');
-                        doc.roundedRect(cardX2, y, cardW, cardH, 3, 3, 'FD');
-
-                        // ── Consórcio ──
-                        let cy = y + 8;
-                        doc.setFontSize(13); doc.setFont('helvetica', 'bold'); doc.setTextColor(6, 182, 212);
-                        doc.text('Consórcio', cardX1 + 5, cy);
-                        cy += 3; doc.setDrawColor(203, 213, 225); doc.line(cardX1 + 5, cy, cardX1 + cardW - 5, cy); cy += 6;
-
-                        doc.setFontSize(9); doc.setFont('helvetica', 'normal'); doc.setTextColor(30, 41, 59);
-                        const consLines = [
-                            ['Crédito:', fmtMoeda(valorBem)],
-                            ['Prazo:', prazoC + ' meses'],
-                            ['Taxa Adm:', state.taxaAdmin + '%'],
-                            ['Parcela:', fmtMoeda(parcelaC)]
-                        ];
-                        consLines.forEach(([l, v]) => { doc.setFont('helvetica', 'bold'); doc.text(l, cardX1 + 5, cy); doc.setFont('helvetica', 'normal'); doc.text(v, cardX1 + 32, cy); cy += 5; });
-                        cy += 4; doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(15, 23, 42);
-                        doc.text('Total Final: ' + fmtMoeda(totalC), cardX1 + 5, cy);
-
-                        // ── Financiamento ──
-                        let fy = y + 8;
-                        doc.setFontSize(13); doc.setFont('helvetica', 'bold'); doc.setTextColor(239, 68, 68);
-                        doc.text('Financiamento', cardX2 + 5, fy);
-                        fy += 3; doc.setDrawColor(203, 213, 225); doc.line(cardX2 + 5, fy, cardX2 + cardW - 5, fy); fy += 6;
-
-                        doc.setFontSize(9); doc.setFont('helvetica', 'normal'); doc.setTextColor(30, 41, 59);
-                        const finLines = [
-                            ['Crédito:', fmtMoeda(valorBem)],
-                            ['Prazo:', prazoF + ' meses'],
-                            ['Juros a.a.:', state.taxaJuros + '%'],
-                            ['Parcela 1ª:', fmtMoeda(parcelaF)]
-                        ];
-                        finLines.forEach(([l, v]) => { doc.setFont('helvetica', 'bold'); doc.text(l, cardX2 + 5, fy); doc.setFont('helvetica', 'normal'); doc.text(v, cardX2 + 32, fy); fy += 5; });
-                        fy += 4; doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(15, 23, 42);
-                        doc.text('Total Final: ' + fmtMoeda(totalF), cardX2 + 5, fy);
-
-                        y += cardH + 8;
-
-                        // ── Veredito ──
+                        cardsHtml = `
+                            <div class="pdf-cards">
+                                <div class="pdf-card">
+                                    <h3 class="pdf-card-title consorcio">Consórcio</h3>
+                                    <div class="pdf-row"><span class="pdf-row-label">Crédito:</span><span class="pdf-row-val">${fmtMoeda(valorBem)}</span></div>
+                                    <div class="pdf-row"><span class="pdf-row-label">Prazo:</span><span class="pdf-row-val">${prazoC} meses</span></div>
+                                    <div class="pdf-row"><span class="pdf-row-label">Taxa Adm.:</span><span class="pdf-row-val">${state.taxaAdmin}% total</span></div>
+                                    <div class="pdf-row"><span class="pdf-row-label">Parcela Mensal:</span><span class="pdf-row-val">${fmtMoeda(parcelaC)}</span></div>
+                                    <div class="pdf-total"><span>Custo Final:</span><span>${fmtMoeda(totalC)}</span></div>
+                                </div>
+                                <div class="pdf-card">
+                                    <h3 class="pdf-card-title financiamento">Financiamento Bancário</h3>
+                                    <div class="pdf-row"><span class="pdf-row-label">Crédito:</span><span class="pdf-row-val">${fmtMoeda(valorBem)}</span></div>
+                                    <div class="pdf-row"><span class="pdf-row-label">Prazo:</span><span class="pdf-row-val">${prazoF} meses</span></div>
+                                    <div class="pdf-row"><span class="pdf-row-label">Juros:</span><span class="pdf-row-val">${taxaJuros}% a.a.</span></div>
+                                    <div class="pdf-row"><span class="pdf-row-label">1ª Parcela:</span><span class="pdf-row-val">${fmtMoeda(parcelaF)}</span></div>
+                                    <div class="pdf-total"><span>Custo Final:</span><span>${fmtMoeda(totalF)}</span></div>
+                                </div>
+                            </div>
+                        `;
                         if (economia > 0) {
-                            doc.setFillColor(236, 253, 245); doc.setDrawColor(16, 185, 129); doc.roundedRect(mx, y, cw, 20, 3, 3, 'FD');
-                            doc.setFontSize(12); doc.setFont('helvetica', 'bold'); doc.setTextColor(4, 120, 87);
-                            doc.text('ECONOMIA GERADA: ' + fmtMoeda(economia), mx + cw / 2, y + 12, { align: 'center' });
-                            y += 28;
+                            verdictHtml = `
+                                <div class="pdf-verdict">
+                                    <p class="pdf-verdict-title">Lucro / Economia Gerada no Consórcio</p>
+                                    <p class="pdf-verdict-val">+ ${fmtMoeda(economia)}</p>
+                                </div>
+                            `;
                         }
                     } else {
-                        // Apenas Consórcio
-                        const cardW = 100;
-                        const cardX1 = mx + (cw - cardW) / 2; // centralizado
-                        const cardH = 55;
-
-                        doc.setFillColor(248, 250, 252);
-                        doc.setDrawColor(226, 232, 240);
-                        doc.roundedRect(cardX1, y, cardW, cardH, 3, 3, 'FD');
-
-                        let cy = y + 8;
-                        doc.setFontSize(13); doc.setFont('helvetica', 'bold'); doc.setTextColor(6, 182, 212);
-                        doc.text('Plano de Consórcio (Detalhes)', cardX1 + 5, cy);
-                        cy += 3; doc.setDrawColor(203, 213, 225); doc.line(cardX1 + 5, cy, cardX1 + cardW - 5, cy); cy += 6;
-
-                        doc.setFontSize(9); doc.setFont('helvetica', 'normal'); doc.setTextColor(30, 41, 59);
-                        const consLines = [
-                            ['Crédito (Valor do Bem):', fmtMoeda(valorBem)],
-                            ['Prazo de Pagamento:', prazoC + ' meses'],
-                            ['Taxa de Administração:', state.taxaAdmin + '% total'],
-                            ['Lance Ofertado:', fmtMoeda(state.lanceProprio + state.lanceEmbutido)],
-                            ['Parcela Mensal:', fmtMoeda(parcelaC)]
-                        ];
-                        consLines.forEach(([l, v]) => { doc.setFont('helvetica', 'bold'); doc.text(l, cardX1 + 5, cy); doc.setFont('helvetica', 'normal'); doc.text(v, cardX1 + 55, cy); cy += 5; });
-                        cy += 3; doc.setFontSize(12); doc.setFont('helvetica', 'bold'); doc.setTextColor(15, 23, 42);
-                        doc.text('Custo Final: ' + fmtMoeda(totalC), cardX1 + 5, cy);
-
-                        y += cardH + 10;
+                        cardsHtml = `
+                            <div class="pdf-cards" style="justify-content: center;">
+                                <div class="pdf-card" style="max-width: 400px;">
+                                    <h3 class="pdf-card-title consorcio">Plano Estruturado - Consórcio</h3>
+                                    <div class="pdf-row"><span class="pdf-row-label">Crédito (Capital):</span><span class="pdf-row-val">${fmtMoeda(valorBem)}</span></div>
+                                    <div class="pdf-row"><span class="pdf-row-label">Prazo do Grupo:</span><span class="pdf-row-val">${prazoC} meses</span></div>
+                                    <div class="pdf-row"><span class="pdf-row-label">Taxa Administrativa:</span><span class="pdf-row-val">${state.taxaAdmin}% total</span></div>
+                                    <div class="pdf-row"><span class="pdf-row-label">Lance Ofertado:</span><span class="pdf-row-val">${fmtMoeda(state.lanceProprio + state.lanceEmbutido)}</span></div>
+                                    <div class="pdf-row"><span class="pdf-row-label">Parcela Mensal:</span><span class="pdf-row-val">${fmtMoeda(parcelaC)}</span></div>
+                                    <div class="pdf-total"><span>Custo Total da Operação:</span><span>${fmtMoeda(totalC)}</span></div>
+                                </div>
+                            </div>
+                        `;
                     }
 
-                    // ═══════════════════════════════════════
-                    // GRÁFICO (Se houver espaço)
-                    // ═══════════════════════════════════════
-                    let chartBase64 = '';
-                    if (chartInstances['canvas-evolucao-main']) chartBase64 = chartInstances['canvas-evolucao-main'].toBase64Image('image/png', 1.0);
-                    else if (chartInstances['canvas-evolucao']) chartBase64 = chartInstances['canvas-evolucao'].toBase64Image('image/png', 1.0);
+                    // Chart HTML
+                    const chartHtml = chartImg ? `
+                        <div class="pdf-chart">
+                            <h3 style="font-size: 14px; margin: 0 0 10px 0; color: #475569;">Evolução Financeira ao Longo do Tempo</h3>
+                            <img src="${chartImg}" alt="Gráfico">
+                        </div>
+                    ` : '';
 
-                    if (chartBase64 && y < 180) {
-                        doc.setDrawColor(226, 232, 240);
-                        doc.roundedRect(mx, y, cw, 95, 3, 3, 'S');
-                        doc.setFontSize(10); doc.setFont('helvetica', 'bold'); doc.setTextColor(51, 65, 85);
-                        doc.text('Evolução Financeira ao Longo do Tempo', mx + cw / 2, y + 8, { align: 'center' });
-                        try { 
-                            // Mantendo a proporção 2:1 para evitar achatamento
-                            doc.addImage(chartBase64, 'PNG', mx + 5, y + 12, cw - 10, (cw - 10) / 2); 
-                        } catch(e) {}
-                    }
+                    const fullHtml = `
+                        ${pdfCSS}
+                        <div class="pdf-wrapper">
+                            <div class="pdf-header">
+                                <div class="pdf-title-box">
+                                    <h1>ConsórcioPro</h1>
+                                    <p>Apresentação Comercial de Viabilidade</p>
+                                </div>
+                                <div class="pdf-date">
+                                    Data: ${new Date().toLocaleDateString('pt-BR')}<br>
+                                    Proposta Oficial
+                                </div>
+                            </div>
+                            
+                            ${iaHtml}
+                            
+                            <h2 class="pdf-section-title">Resumo Financeiro da Operação</h2>
+                            ${cardsHtml}
+                            ${verdictHtml}
+                            ${chartHtml}
+                            
+                            <div class="pdf-footer">
+                                Este documento é uma simulação estratégica (Análise por IA) e não configura proposta oficial vinculativa.<br>
+                                Valores sujeitos a alteração conforme tabela da administradora e análise de crédito.
+                            </div>
+                        </div>
+                    `;
 
-                    // ── RODAPÉ ──
-                    doc.setFontSize(7); doc.setFont('helvetica', 'normal'); doc.setTextColor(148, 163, 184);
-                    doc.text('Este documento é uma simulação gerada por Inteligência Artificial (OpenAI) e não configura proposta de crédito oficial.', mx + cw / 2, 280, { align: 'center' });
-                    doc.text('Valores sujeitos a alteração conforme análise de crédito e variação de índices.', mx + cw / 2, 284, { align: 'center' });
+                    pdfContainer.innerHTML = fullHtml;
+                    document.body.appendChild(pdfContainer);
 
-                    // Salvar
-                    doc.save('Apresentacao_Proposta_Inteligente.pdf');
+                    // Gerar o PDF usando html2pdf
+                    const opt = {
+                        margin:       0,
+                        filename:     'Proposta_Comercial_ConsorcioPro.pdf',
+                        image:        { type: 'jpeg', quality: 0.98 },
+                        html2canvas:  { scale: 2, useCORS: true },
+                        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                    };
+
+                    await html2pdf().set(opt).from(pdfContainer).save();
+                    
+                    // Cleanup
+                    document.body.removeChild(pdfContainer);
 
                 } catch (err) {
                     console.error('Erro ao gerar PDF:', err);
