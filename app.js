@@ -1125,7 +1125,7 @@
 
                     const fullHtml = `
                         ${pdfCSS}
-                        <div class="pdf-wrapper" style="font-family: 'Inter', 'Segoe UI', sans-serif; max-width: 750px; margin: 0 auto; background: #fff; padding: 20px;">
+                        <div class="pdf-wrapper" style="font-family: 'Inter', 'Segoe UI', sans-serif; max-width: 750px; max-height: 1050px; overflow: hidden; margin: 0 auto; background: #fff; padding: 20px;">
                             <div class="pdf-header">
                                 <div class="pdf-title-box">
                                     <h1>ConsórcioPro</h1>
@@ -1133,7 +1133,6 @@
                                 </div>
                                 <div class="pdf-date">
                                     Data: ${new Date().toLocaleDateString('pt-BR')}<br>
-                                    Documento Gerado por IA
                                 </div>
                             </div>
                             
@@ -1142,23 +1141,16 @@
                             </div>
                             ${cardsHtml}
                             ${verdictHtml}
-                            
-                            <div class="pdf-footer">
-                                Este documento constitui uma simulação estratégica gerada por inteligência artificial e não configura proposta oficial vinculativa.<br>
-                                Valores sujeitos a alteração conforme tabela da administradora, condições do grupo e análise de crédito.<br>
-                                ConsórcioPro &copy; ${new Date().getFullYear()} — Tecnologia aplicada ao planejamento financeiro.
-                            </div>
                         </div>
                     `;
 
                     // Gerar o PDF usando html2pdf usando a string HTML diretamente, sem mexer no DOM visível
                     const opt = {
-                        margin:       [10, 0, 10, 0],
+                        margin:       [5, 0, 0, 0],
                         filename:     'Proposta_Comercial_ConsorcioPro.pdf',
                         image:        { type: 'jpeg', quality: 0.98 },
                         html2canvas:  { scale: 2, useCORS: true },
-                        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                        pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
+                        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
                     };
 
                     await html2pdf().set(opt).from(fullHtml).save();
