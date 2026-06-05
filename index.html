@@ -77,7 +77,7 @@
                             <label for="input-valor-carta">Valor da Carta de Crédito</label>
                             <div class="input-wrapper currency">
                                 <span class="input-prefix">R$</span>
-                                <input type="text" id="input-valor-carta" value="" placeholder="0,00" inputmode="decimal" autocomplete="off">
+                                <input type="text" id="taxa-juros" class="input-field" placeholder="0" data-type="percent">0,00" inputmode="decimal" autocomplete="off">
                             </div>
                             <input type="range" id="slider-valor-carta" min="10000" max="1000000" step="10000" value="0" class="range-slider" style="margin-top: 10px;">
                         </div>
@@ -147,8 +147,8 @@
                         <div class="input-group">
                             <label for="input-lance-proprio">Lance com Recursos Próprios</label>
                             <div class="lance-mode-toggle" id="toggle-modo-lance-proprio">
-                                <button class="lance-mode-btn active" data-mode="pct">% da Carta</button>
-                                <button class="lance-mode-btn" data-mode="valor">R$ Valor</button>
+                                <button class="lance-mode-btn active" data-mode="pct">Percentual</button>
+                                <button class="lance-mode-btn" data-mode="valor">Valor Real</button>
                             </div>
                             <div class="input-wrapper currency" id="wrapper-lance-proprio">
                                 <span class="input-prefix" id="prefix-lance-proprio">%</span>
@@ -160,12 +160,12 @@
                         <div class="input-group">
                             <label for="input-lance-embutido">Lance Embutido (Descontado da carta)</label>
                             <div class="lance-mode-toggle" id="toggle-modo-lance-embutido">
-                                <button class="lance-mode-btn active" data-mode="pct">% da Carta</button>
-                                <button class="lance-mode-btn" data-mode="valor">R$ Valor</button>
+                                <button class="lance-mode-btn active" data-mode="pct">Percentual</button>
+                                <button class="lance-mode-btn" data-mode="valor">Valor Real</button>
                             </div>
                             <div class="input-wrapper currency" id="wrapper-lance-embutido">
                                 <span class="input-prefix" id="prefix-lance-embutido">%</span>
-                                <input type="number" id="input-lance-embutido" value="" placeholder="0" step="0.1" min="0" max="100" autocomplete="off">
+                                    <input type="number" id="prazo-financiamento" class="input-field" placeholder="0"> placeholder="0" step="0.1" min="0" max="100" autocomplete="off">
                             </div>
                             <div class="lance-percentage" id="pct-lance-embutido"></div>
                         </div>
@@ -224,13 +224,13 @@
                         <h2>Visão Geral</h2>
                     </div>
                     <div class="card-body">
-                                                <!-- Tabela Comparativa na Main -->
+                        <!-- Tabela Comparativa na Main -->
                         <div class="comparison-table-wrapper" style="margin-top: 0; padding: 0; overflow-x: auto;">
                             <table class="comparison-table" id="tabela-comparativa-main" style="width: 100%; font-size: 0.85rem;">
                                 <thead>
                                     <tr>
-                                        <th style="padding: 8px;">Crit�rio</th>
-                                        <th class="col-consorcio" style="padding: 8px;">Cons�rcio</th>
+                                        <th style="padding: 8px;">Critério</th>
+                                        <th class="col-consorcio" style="padding: 8px;">Consórcio</th>
                                         <th class="col-financiamento" style="padding: 8px;">Financiamento</th>
                                     </tr>
                                 </thead>
@@ -263,7 +263,6 @@
                                 </tbody>
                             </table>
                         </div>
-
                         <div class="divider"></div>
 
                         <div class="timeline-mini">
@@ -370,7 +369,7 @@
                 <p class="section-subtitle">Comparativo detalhado e visão consolidada da sua simulação</p>
                 <button id="btn-export-pdf" style="margin-top: 15px; background: linear-gradient(135deg, var(--blue), var(--purple)); color: white; border: none; padding: 12px 24px; border-radius: var(--radius-md); font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 0.95rem; transition: opacity 0.2s; box-shadow: 0 4px 15px var(--blue-glow);">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 0 1 10 10c0 5.523-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2z"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-                    Gerar PDF
+                    Gerar Apresentação
                 </button>
             </div>
 
@@ -665,4 +664,3 @@
     <script src="app.js?v=13"></script>
 </body>
 </html>
-
