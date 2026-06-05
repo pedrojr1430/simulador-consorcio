@@ -1130,7 +1130,7 @@
                                 widths: ['*', 'auto'],
                                 body: [
                                     [
-                                        { text: 'Crédito Total (Carta + Próprio):', style: 'soloLabel' },
+                                        { text: 'Crédito Total da Operação (com lance):', style: 'soloLabel' },
                                         { text: fmtMoeda(creditoTotal), style: 'soloVal' }
                                     ],
                                     [
@@ -1158,7 +1158,11 @@
                                         { text: fmtMoeda(parcelaC), style: 'soloVal' }
                                     ],
                                     [
-                                        { text: 'Custo Total + Lance:', style: 'soloTotal' },
+                                        { text: 'Custo Total (Sem Lance Próprio):', style: 'soloLabel' },
+                                        { text: fmtMoeda(totalC), style: 'soloVal' }
+                                    ],
+                                    [
+                                        { text: 'Custo Total (Com Lance Próprio):', style: 'soloTotal' },
                                         { 
                                             text: [
                                                 { text: fmtMoeda(totalC + (state._lance ? state._lance.lanceProprio : 0)) },
