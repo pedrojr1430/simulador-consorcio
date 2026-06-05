@@ -340,30 +340,30 @@
         // Tabela comparativa
         const labelCompParcela = $('#label-comp-parcela');
         if (labelCompParcela) labelCompParcela.textContent = taxaCorrecao > 0 ? 'Parcela Inicial' : 'Parcela Mensal';
-        \#tab-parcela-consorcio.textContent = Calculator.formatarMoeda(lance.primeiraParcela);
-        \#tab-parcela-financiamento.textContent = Calculator.formatarMoeda(dispParcelaFin);
-        \#tab-prazo-consorcio.textContent = "${lance.novoPrazo} meses";
-        \#tab-prazo-financiamento.textContent = "${dispPrazoFin} meses";
-        \#tab-lance-consorcio.textContent = Calculator.formatarMoeda(totalLance);
-        \#tab-entrada-financiamento.textContent = Calculator.formatarMoeda(dispEntradaFin);
-        \#tab-custo-consorcio.textContent = Calculator.formatarMoeda(totalConsorcio);
-        \#tab-custo-financiamento.textContent = Calculator.formatarMoeda(totalFinanciamento);
-        \#tab-juros-consorcio.textContent = Calculator.formatarMoeda(lance.custoConsorcio);
-        \#tab-juros-financiamento.textContent = Calculator.formatarMoeda(dispJurosFin);
+        $('#tab-parcela-consorcio').textContent = Calculator.formatarMoeda(lance.primeiraParcela);
+        $('#tab-parcela-financiamento').textContent = Calculator.formatarMoeda(dispParcelaFin);
+        $('#tab-prazo-consorcio').textContent = `${lance.novoPrazo} meses`;
+        $('#tab-prazo-financiamento').textContent = `${dispPrazoFin} meses`;
+        $('#tab-lance-consorcio').textContent = Calculator.formatarMoeda(totalLance);
+        $('#tab-entrada-financiamento').textContent = Calculator.formatarMoeda(dispEntradaFin);
+        $('#tab-custo-consorcio').textContent = Calculator.formatarMoeda(totalConsorcio);
+        $('#tab-custo-financiamento').textContent = Calculator.formatarMoeda(totalFinanciamento);
+        $('#tab-juros-consorcio').textContent = Calculator.formatarMoeda(lance.custoConsorcio);
+        $('#tab-juros-financiamento').textContent = Calculator.formatarMoeda(dispJurosFin);
 
         // Update the main dashboard comparative table
-        const labelCompParcelaMain = \#label-comp-parcela-main;
+        const labelCompParcelaMain = $('#label-comp-parcela-main');
         if (labelCompParcelaMain) labelCompParcelaMain.textContent = taxaCorrecao > 0 ? 'Parcela Inicial' : 'Parcela Mensal';
-        if (\#tab-parcela-consorcio-main) \#tab-parcela-consorcio-main.textContent = Calculator.formatarMoeda(lance.primeiraParcela);
-        if (\#tab-parcela-financiamento-main) \#tab-parcela-financiamento-main.textContent = Calculator.formatarMoeda(dispParcelaFin);
-        if (\#tab-prazo-consorcio-main) \#tab-prazo-consorcio-main.textContent = "${lance.novoPrazo} meses";
-        if (\#tab-prazo-financiamento-main) \#tab-prazo-financiamento-main.textContent = "${dispPrazoFin} meses";
-        if (\#tab-lance-consorcio-main) \#tab-lance-consorcio-main.textContent = Calculator.formatarMoeda(totalLance);
-        if (\#tab-entrada-financiamento-main) \#tab-entrada-financiamento-main.textContent = Calculator.formatarMoeda(dispEntradaFin);
-        if (\#tab-custo-consorcio-main) \#tab-custo-consorcio-main.textContent = Calculator.formatarMoeda(totalConsorcio);
-        if (\#tab-custo-financiamento-main) \#tab-custo-financiamento-main.textContent = Calculator.formatarMoeda(totalFinanciamento);
-        if (\#tab-juros-consorcio-main) \#tab-juros-consorcio-main.textContent = Calculator.formatarMoeda(lance.custoConsorcio);
-        if (\#tab-juros-financiamento-main) \#tab-juros-financiamento-main.textContent = Calculator.formatarMoeda(dispJurosFin);
+        if ($('#tab-parcela-consorcio-main')) $('#tab-parcela-consorcio-main').textContent = Calculator.formatarMoeda(lance.primeiraParcela);
+        if ($('#tab-parcela-financiamento-main')) $('#tab-parcela-financiamento-main').textContent = Calculator.formatarMoeda(dispParcelaFin);
+        if ($('#tab-prazo-consorcio-main')) $('#tab-prazo-consorcio-main').textContent = `${lance.novoPrazo} meses`;
+        if ($('#tab-prazo-financiamento-main')) $('#tab-prazo-financiamento-main').textContent = `${dispPrazoFin} meses`;
+        if ($('#tab-lance-consorcio-main')) $('#tab-lance-consorcio-main').textContent = Calculator.formatarMoeda(totalLance);
+        if ($('#tab-entrada-financiamento-main')) $('#tab-entrada-financiamento-main').textContent = Calculator.formatarMoeda(dispEntradaFin);
+        if ($('#tab-custo-consorcio-main')) $('#tab-custo-consorcio-main').textContent = Calculator.formatarMoeda(totalConsorcio);
+        if ($('#tab-custo-financiamento-main')) $('#tab-custo-financiamento-main').textContent = Calculator.formatarMoeda(totalFinanciamento);
+        if ($('#tab-juros-consorcio-main')) $('#tab-juros-consorcio-main').textContent = Calculator.formatarMoeda(lance.custoConsorcio);
+        if ($('#tab-juros-financiamento-main')) $('#tab-juros-financiamento-main').textContent = Calculator.formatarMoeda(dispJurosFin);
 
         highlightWinner('#tab-parcela-consorcio-main', '#tab-parcela-financiamento-main', lance.novaParcela, dispParcelaFin, true);
         highlightWinner('#tab-prazo-consorcio-main', '#tab-prazo-financiamento-main', lance.novoPrazo, dispPrazoFin, true);
@@ -416,9 +416,6 @@
             }
             verdictBoxMain.style.display = isComparativo ? 'flex' : 'none';
         }
-
-        const tabCompMain = \#tabela-comparativa-main;
-        if (tabCompMain) tabCompMain.parentElement.style.display = isComparativo ? 'block' : 'none';
 
         // 7. Dashboard KPIs
         const elCarta = $('#kpi-valor-carta');
@@ -1234,6 +1231,3 @@
         safeStart();
     }
 })();
-
-
-
