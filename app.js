@@ -354,6 +354,7 @@
         const economia = totalFinanciamento - totalConsorcio;
 
         // Comparador verdict
+        const isComparativo = (prazoFinanciamento > 0 && taxaJuros > 0);
         const verdictBox = $('#verdict-box');
         if (verdictBox) {
             if (economia > 0) {
@@ -369,6 +370,7 @@
                 $('#verdict-title').textContent = 'Ambos possuem custo semelhante';
                 $('#verdict-detail').textContent = `A diferença é praticamente zero.`;
             }
+            verdictBox.style.display = isComparativo ? 'flex' : 'none';
         }
 
         // Main page verdict
@@ -387,6 +389,7 @@
                 $('#verdict-title-main').textContent = 'Custo semelhante';
                 $('#verdict-detail-main').textContent = 'Ambas as opções têm custo similar.';
             }
+            verdictBoxMain.style.display = isComparativo ? 'flex' : 'none';
         }
 
         // 7. Dashboard KPIs
@@ -400,20 +403,27 @@
         if (elLanceEmb) elLanceEmb.textContent = Calculator.formatarMoeda(lance.lanceEmbutido);
 
         const elCredLiq = $('#kpi-valor-credito-liq');
-        if (elCredLiq) elCredLiq.textContent = Calculator.formatarMoeda(lance.cartaEfetiva);
+        if (elCredLiq) elCredLiq.textContent = Calculator.formatarMoeda(valorCarta - lance.lanceProprio - lance.lanceEmbutido);
 
         const elParcela = $('#kpi-valor-parcela');
         if (elParcela) elParcela.textContent = Calculator.formatarMoeda(lance.novaParcela);
 
         const elEco = $('#kpi-valor-economia');
+        const kpiEcoCard = $('#kpi-economia');
         if (elEco) {
             elEco.textContent = Calculator.formatarMoeda(Math.max(0, economia));
-            if (economia > 0) {
-                $('#kpi-economia').classList.add('positive');
-            } else {
-                $('#kpi-economia').classList.remove('positive');
+            if (kpiEcoCard) {
+                if (economia > 0) {
+                    kpiEcoCard.classList.add('positive');
+                } else {
+                    kpiEcoCard.classList.remove('positive');
+                }
+                kpiEcoCard.style.display = isComparativo ? 'flex' : 'none';
             }
         }
+
+        const elDonutFin = $('#donut-financiamento');
+        if (elDonutFin) elDonutFin.style.display = isComparativo ? 'flex' : 'none';
 
         if (finAtivo && finAtivo.tabela) {
         }  // 9. Store calculated data for charts
@@ -1090,7 +1100,7 @@
                                     ],
                                     [
                                         { text: 'Crédito Líquido Disponível:', style: 'soloLabel' },
-                                        { text: fmtMoeda(state._lance ? state._lance.cartaEfetiva : valorBem), style: 'soloVal', color: '#0e7490' }
+                                        { text: fmtMoeda(state._lance ? valorBem - state._lance.lanceProprio - state._lance.lanceEmbutido : valorBem), style: 'soloVal', color: '#0e7490' }
                                     ],
                                     [
                                         { text: 'Prazo do Grupo:', style: 'soloLabel' },
