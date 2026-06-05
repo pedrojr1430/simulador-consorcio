@@ -275,7 +275,13 @@
         animatePulse('#lance-results');
 
         // 3. Overview
-        // Elementos removidos em favor da tabela comparativa na main
+        const creditoLiquido = valorCarta - lance.lanceProprio - lance.lanceEmbutido;
+        const creditoTotal = creditoLiquido + lance.lanceProprio; // which is valorCarta - lance.lanceEmbutido
+
+        if ($('#vg-credito-total')) $('#vg-credito-total').textContent = Calculator.formatarMoeda(creditoTotal);
+        if ($('#vg-credito-liquido')) $('#vg-credito-liquido').textContent = Calculator.formatarMoeda(creditoLiquido);
+        if ($('#vg-lance-proprio')) $('#vg-lance-proprio').textContent = Calculator.formatarMoeda(lance.lanceProprio);
+        if ($('#vg-lance-embutido')) $('#vg-lance-embutido').textContent = Calculator.formatarMoeda(lance.lanceEmbutido);
 
         // Timeline
         const timelineLancePct = lance.totalPago > 0 ? (totalLance / lance.totalPago) * 100 : 0;
@@ -338,8 +344,8 @@
         $('#tab-entrada-financiamento').textContent = Calculator.formatarMoeda(dispEntradaFin);
         $('#tab-custo-consorcio').textContent = Calculator.formatarMoeda(totalConsorcio);
         $('#tab-custo-financiamento').textContent = Calculator.formatarMoeda(totalFinanciamento);
-        $('#tab-juros-consorcio').textContent = Calculator.formatarMoeda(lance.custoConsorcio);
-        $('#tab-juros-financiamento').textContent = Calculator.formatarMoeda(dispJurosFin);
+        $('#tab-custo-lance-consorcio').textContent = Calculator.formatarMoeda(totalConsorcio + lance.lanceProprio);
+        $('#tab-custo-entrada-financiamento').textContent = Calculator.formatarMoeda(totalFinanciamento + dispEntradaFin);
 
         // Update the main dashboard comparative table
         const labelCompParcelaMain = $('#label-comp-parcela-main');
@@ -364,7 +370,7 @@
         highlightWinner('#tab-parcela-consorcio', '#tab-parcela-financiamento', lance.novaParcela, dispParcelaFin, true);
         highlightWinner('#tab-prazo-consorcio', '#tab-prazo-financiamento', lance.novoPrazo, dispPrazoFin, true);
         highlightWinner('#tab-custo-consorcio', '#tab-custo-financiamento', totalConsorcio, totalFinanciamento, true);
-        highlightWinner('#tab-juros-consorcio', '#tab-juros-financiamento', lance.custoConsorcio, dispJurosFin, true);
+        highlightWinner('#tab-custo-lance-consorcio', '#tab-custo-entrada-financiamento', totalConsorcio + lance.lanceProprio, totalFinanciamento + dispEntradaFin, true);
 
         // 6. Veredito
         const economia = totalFinanciamento - totalConsorcio;
@@ -663,7 +669,7 @@
             const reserva = lance.totalReserva;
             const lanceVal = state.lanceProprio;
             segments = [
-                { label: 'Amortização (Líquido)', value: Math.max(0, amort - lanceVal), color: '#3b82f6' },
+                { label: 'Amortização (Líquido)', value: Math.max(0, lance.totalPago - admin - reserva), color: '#3b82f6' },
                 { label: 'Taxas e Admin', value: admin + reserva, color: '#10b981' },
                 { label: 'Juros', value: 0, color: '#ef4444' },
                 { label: 'Lance (Próprio)', value: lanceVal, color: '#f0b429' }

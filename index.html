@@ -224,6 +224,24 @@
                         <h2>Visão Geral</h2>
                     </div>
                     <div class="card-body">
+                        <div class="visao-geral-metrics" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; text-align: center;">
+                            <div class="metric-box" style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+                                <span class="metric-label" style="display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 5px;">Crédito Total</span>
+                                <span class="metric-value" id="vg-credito-total" style="font-size: 1rem; font-weight: 700; color: white;">R$ 0,00</span>
+                            </div>
+                            <div class="metric-box" style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+                                <span class="metric-label" style="display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 5px;">Crédito Líquido</span>
+                                <span class="metric-value" id="vg-credito-liquido" style="font-size: 1rem; font-weight: 700; color: var(--blue);">R$ 0,00</span>
+                            </div>
+                            <div class="metric-box" style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+                                <span class="metric-label" style="display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 5px;">Lance Próprio</span>
+                                <span class="metric-value" id="vg-lance-proprio" style="font-size: 1rem; font-weight: 700; color: var(--emerald);">R$ 0,00</span>
+                            </div>
+                            <div class="metric-box" style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+                                <span class="metric-label" style="display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 5px;">Lance Embutido</span>
+                                <span class="metric-value" id="vg-lance-embutido" style="font-size: 1rem; font-weight: 700; color: var(--gold);">R$ 0,00</span>
+                            </div>
+                        </div>
                         <!-- Tabela Comparativa na Main -->
                         <div class="comparison-table-wrapper" style="margin-top: 0; padding: 0; overflow-x: auto;">
                             <table class="comparison-table" id="tabela-comparativa-main" style="width: 100%; font-size: 0.85rem;">
@@ -496,9 +514,9 @@
                                         <td class="col-financiamento" id="tab-custo-financiamento">R$ 0,00</td>
                                     </tr>
                                     <tr>
-                                        <td>Juros / Taxas Pagos</td>
-                                        <td class="col-consorcio" id="tab-juros-consorcio">R$ 12.600,00</td>
-                                        <td class="col-financiamento" id="tab-juros-financiamento">R$ 0,00</td>
+                                        <td>Custo Total + Lance/Entrada</td>
+                                        <td class="col-consorcio" id="tab-custo-lance-consorcio">R$ 0,00</td>
+                                        <td class="col-financiamento" id="tab-custo-entrada-financiamento">R$ 0,00</td>
                                     </tr>
                                 </tbody>
                             </table>
