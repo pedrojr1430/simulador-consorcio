@@ -390,16 +390,17 @@
         }
 
         // 7. Dashboard KPIs
-        $('#kpi-valor-carta').textContent = Calculator.formatarMoeda(valorCarta);
+        const elCarta = $('#kpi-valor-carta');
+        if (elCarta) elCarta.textContent = Calculator.formatarMoeda(valorCarta);
         
-        const elLance = $('#kpi-valor-lance');
-        if (elLance) {
-            elLance.textContent = Calculator.formatarMoeda(lance.totalLanceOfertado);
-            const elLanceComp = $('#kpi-lance-comp');
-            if (elLanceComp) {
-                elLanceComp.textContent = `(${Calculator.formatarMoeda(lance.lanceProprio)} Próprio + ${Calculator.formatarMoeda(lance.lanceEmbutido)} Emb.)`;
-            }
-        }
+        const elLanceProp = $('#kpi-valor-lance-proprio');
+        if (elLanceProp) elLanceProp.textContent = Calculator.formatarMoeda(lance.lanceProprio);
+        
+        const elLanceEmb = $('#kpi-valor-lance-embutido');
+        if (elLanceEmb) elLanceEmb.textContent = Calculator.formatarMoeda(lance.lanceEmbutido);
+
+        const elCredLiq = $('#kpi-valor-credito-liq');
+        if (elCredLiq) elCredLiq.textContent = Calculator.formatarMoeda(lance.cartaEfetiva);
 
         const elParcela = $('#kpi-valor-parcela');
         if (elParcela) elParcela.textContent = Calculator.formatarMoeda(lance.novaParcela);
@@ -413,12 +414,6 @@
                 $('#kpi-economia').classList.remove('positive');
             }
         }
-
-        const elCredLiq = $('#kpi-valor-credito-liq');
-        if (elCredLiq) elCredLiq.textContent = Calculator.formatarMoeda(lance.cartaEfetiva);
-
-        const elPoderCompra = $('#kpi-valor-poder-compra');
-        if (elPoderCompra) elPoderCompra.textContent = Calculator.formatarMoeda(lance.cartaEfetiva + lance.lanceProprio);
 
         if (finAtivo && finAtivo.tabela) {
         }  // 9. Store calculated data for charts
@@ -1082,8 +1077,20 @@
                                 widths: ['*', 'auto'],
                                 body: [
                                     [
-                                        { text: 'Crédito (Capital Base):', style: 'soloLabel' },
+                                        { text: 'Crédito Total (Carta):', style: 'soloLabel' },
                                         { text: fmtMoeda(valorBem), style: 'soloVal' }
+                                    ],
+                                    [
+                                        { text: 'Lance Próprio:', style: 'soloLabel' },
+                                        { text: fmtMoeda(state._lance ? state._lance.lanceProprio : 0), style: 'soloVal' }
+                                    ],
+                                    [
+                                        { text: 'Lance Embutido:', style: 'soloLabel' },
+                                        { text: fmtMoeda(state._lance ? state._lance.lanceEmbutido : 0), style: 'soloVal' }
+                                    ],
+                                    [
+                                        { text: 'Crédito Líquido Disponível:', style: 'soloLabel' },
+                                        { text: fmtMoeda(state._lance ? state._lance.cartaEfetiva : valorBem), style: 'soloVal', color: '#0e7490' }
                                     ],
                                     [
                                         { text: 'Prazo do Grupo:', style: 'soloLabel' },
@@ -1092,24 +1099,6 @@
                                     [
                                         { text: 'Taxa Administrativa:', style: 'soloLabel' },
                                         { text: `${state.taxaAdmin}% total`, style: 'soloVal' }
-                                    ],
-                                    [
-                                        { text: 'Lance Total Ofertado:', style: 'soloLabel' },
-                                        { 
-                                            text: [
-                                                { text: fmtMoeda(state._lance ? state._lance.totalLanceOfertado : 0) },
-                                                { text: `\n(${fmtMoeda(state._lance ? state._lance.lanceProprio : 0)} Próprio + ${fmtMoeda(state._lance ? state._lance.lanceEmbutido : 0)} Emb.)`, fontSize: 9, color: '#64748b', bold: false }
-                                            ],
-                                            style: 'soloVal' 
-                                        }
-                                    ],
-                                    [
-                                        { text: 'Crédito Líquido (Sem Lance):', style: 'soloLabel' },
-                                        { text: fmtMoeda(state._lance ? state._lance.cartaEfetiva : valorBem), style: 'soloVal', color: '#0e7490' }
-                                    ],
-                                    [
-                                        { text: 'Poder de Compra (Líquido + Próprio):', style: 'soloLabel' },
-                                        { text: fmtMoeda(state._lance ? state._lance.cartaEfetiva + state._lance.lanceProprio : valorBem), style: 'soloVal', color: '#b45309' }
                                     ],
                                     [
                                         { text: 'Parcela Mensal:', style: 'soloLabel' },
