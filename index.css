@@ -501,3 +501,5 @@ td.loser { color: var(--red) !important; opacity: 0.7; }
 ::selection { background: var(--blue); color: white; }
 
 
+@ k e y f r a m e s   s p i n   {   1 0 0 %   {   t r a n s f o r m :   r o t a t e ( 3 6 0 d e g ) ;   }   }  
+ 

@@ -864,7 +864,7 @@
                 }
 
                 const originalText = btnExportPdf.innerHTML;
-                btnExportPdf.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation: spin 1s linear infinite;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Gerando Proposta com IA...';
+                btnExportPdf.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation: spin 1s linear infinite;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Processando Arquivo...';
                 btnExportPdf.style.opacity = '0.7';
                 btnExportPdf.style.pointerEvents = 'none';
 
