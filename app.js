@@ -275,17 +275,7 @@
         animatePulse('#lance-results');
 
         // 3. Overview
-        $('#overview-carta').textContent = Calculator.formatarMoeda(valorCarta);
-        $('#overview-lance').textContent = Calculator.formatarMoeda(totalLance);
-        $('#overview-saldo').textContent = Calculator.formatarMoeda(lance.saldoDevedor);
-        $('#overview-total').textContent = Calculator.formatarMoeda(lance.totalPago);
-        $('#overview-cet').textContent = `${Calculator.formatarNumero(lance.cetConsorcio, 2)}%`;
-
-        // Bars
-        const lancePctBar = valorCarta > 0 ? Math.min(100, (totalLance / valorCarta) * 100) : 0;
-        $('#bar-lance').style.width = `${lancePctBar}%`;
-        const saldoPctBar = valorCarta > 0 ? Math.min(100, (lance.saldoDevedor / basica.totalPagar) * 100) : 0;
-        $('#bar-saldo').style.width = `${saldoPctBar}%`;
+        // Elementos removidos em favor da tabela comparativa na main
 
         // Timeline
         const timelineLancePct = lance.totalPago > 0 ? (totalLance / lance.totalPago) * 100 : 0;
