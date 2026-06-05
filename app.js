@@ -320,7 +320,7 @@
         const isComparativo = (prazoFinanciamento > 0 && taxaJuros > 0);
         
         const totalConsorcio = lance.totalPago;
-        const totalFinanciamento = isComparativo ? finAtivo.totalPago : 0;
+        const totalFinanciamento = isComparativo ? finAtivo.totalJuros : 0;
         const dispParcelaFin = isComparativo ? parcelaFin : 0;
         const dispPrazoFin = isComparativo ? prazoFinanciamento : 0;
         const dispEntradaFin = isComparativo ? entrada : 0;
@@ -687,10 +687,9 @@
             segments = [
                 { label: 'Amortização', value: amort, color: '#3b82f6' },
                 { label: 'Taxas e Admin', value: 0, color: '#10b981' },
-                { label: 'Juros (Total)', value: juros, color: '#ef4444' },
-                { label: 'Entrada', value: entrada, color: '#f0b429' }
+                { label: 'Juros (Total)', value: juros, color: '#ef4444' }
             ];
-            $('#donut-total-financiamento').textContent = Calculator.formatarMoeda(finAtivo.totalPago + entrada);
+            $('#donut-total-financiamento').textContent = Calculator.formatarMoeda(finAtivo.totalPago - entrada);
         }
 
         const data = segments.filter(s => s.value > 0);
@@ -931,7 +930,7 @@
                     const creditoTotal = creditoLiquido + (state._lance ? state._lance.lanceProprio : 0);
                     const parcelaC = state._lance ? state._lance.novaParcela : 0;
                     const totalC = state._lance ? state._lance.totalPago : 0;
-                    const totalF = state._finAtivo ? state._finAtivo.totalPago : 0;
+                    const totalF = state._finAtivo ? state._finAtivo.totalJuros : 0;
                     const parcelaF = state._finAtivo ? (state._finAtivo.tabela[0]?.parcela || 0) : 0;
                     const prazoC = state._lance ? state._lance.novoPrazo : state.prazo;
                     const prazoF = state.prazoFinanciamento || 0;
@@ -1085,6 +1084,12 @@
                                         { text: fmtMoeda(totalC), style: 'tableCellC', fontSize: 11 },
                                         { text: fmtMoeda(totalF), style: 'tableCellF', fontSize: 11 },
                                         { ...tagRes(totalC, totalF), style: ['tableCellR', tagRes(totalC, totalF).style], fontSize: 10 }
+                                    ],
+                                    [
+                                        { text: 'Custo Total + Lance/Entrada', style: 'tableCellLabel', color: '#0f172a' },
+                                        { text: fmtMoeda(totalC + (state._lance ? state._lance.lanceProprio : 0)), style: 'tableCellC', fontSize: 11 },
+                                        { text: fmtMoeda(totalF + (state._fin ? state._fin.entrada : 0)), style: 'tableCellF', fontSize: 11 },
+                                        { ...tagRes(totalC + (state._lance ? state._lance.lanceProprio : 0), totalF + (state._fin ? state._fin.entrada : 0)), style: ['tableCellR', tagRes(totalC + (state._lance ? state._lance.lanceProprio : 0), totalF + (state._fin ? state._fin.entrada : 0)).style], fontSize: 10 }
                                     ]
                                 ]
                             },
