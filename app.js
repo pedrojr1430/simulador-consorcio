@@ -352,13 +352,13 @@
         if ($('#tab-entrada-financiamento-main')) $('#tab-entrada-financiamento-main').textContent = Calculator.formatarMoeda(dispEntradaFin);
         if ($('#tab-custo-consorcio-main')) $('#tab-custo-consorcio-main').textContent = Calculator.formatarMoeda(totalConsorcio);
         if ($('#tab-custo-financiamento-main')) $('#tab-custo-financiamento-main').textContent = Calculator.formatarMoeda(totalFinanciamento);
-        if ($('#tab-juros-consorcio-main')) $('#tab-juros-consorcio-main').textContent = Calculator.formatarMoeda(lance.custoConsorcio);
-        if ($('#tab-juros-financiamento-main')) $('#tab-juros-financiamento-main').textContent = Calculator.formatarMoeda(dispJurosFin);
+        if ($('#tab-custo-lance-consorcio-main')) $('#tab-custo-lance-consorcio-main').textContent = Calculator.formatarMoeda(totalConsorcio + lance.lanceProprio);
+        if ($('#tab-custo-entrada-financiamento-main')) $('#tab-custo-entrada-financiamento-main').textContent = Calculator.formatarMoeda(totalFinanciamento + dispEntradaFin);
 
         highlightWinner('#tab-parcela-consorcio-main', '#tab-parcela-financiamento-main', lance.novaParcela, dispParcelaFin, true);
         highlightWinner('#tab-prazo-consorcio-main', '#tab-prazo-financiamento-main', lance.novoPrazo, dispPrazoFin, true);
         highlightWinner('#tab-custo-consorcio-main', '#tab-custo-financiamento-main', totalConsorcio, totalFinanciamento, true);
-        highlightWinner('#tab-juros-consorcio-main', '#tab-juros-financiamento-main', lance.custoConsorcio, dispJurosFin, true);
+        highlightWinner('#tab-custo-lance-consorcio-main', '#tab-custo-entrada-financiamento-main', totalConsorcio + lance.lanceProprio, totalFinanciamento + dispEntradaFin, true);
 
         // Highlight winner
         highlightWinner('#tab-parcela-consorcio', '#tab-parcela-financiamento', lance.novaParcela, dispParcelaFin, true);
