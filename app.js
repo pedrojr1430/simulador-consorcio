@@ -1130,8 +1130,14 @@
                                 widths: ['*', 'auto'],
                                 body: [
                                     [
-                                        { text: 'Crédito Total da Operação (com lance):', style: 'soloLabel' },
-                                        { text: fmtMoeda(creditoTotal), style: 'soloVal' }
+                                        { text: 'Custo Total (Com Lance Próprio):', style: 'soloLabel' },
+                                        { 
+                                            text: [
+                                                { text: fmtMoeda(totalC + (state._lance ? state._lance.lanceProprio : 0)) },
+                                                { text: `\n(${fmtMoeda(state._lance ? state._lance.lanceProprio : 0)} Próprio + ${fmtMoeda(totalC)} Parcelas)`, fontSize: 9, color: '#475569', bold: false }
+                                            ],
+                                            style: 'soloVal' 
+                                        }
                                     ],
                                     [
                                         { text: 'Lance Próprio:', style: 'soloLabel' },
@@ -1162,14 +1168,8 @@
                                         { text: fmtMoeda(totalC), style: 'soloVal' }
                                     ],
                                     [
-                                        { text: 'Custo Total (Com Lance Próprio):', style: 'soloTotal' },
-                                        { 
-                                            text: [
-                                                { text: fmtMoeda(totalC + (state._lance ? state._lance.lanceProprio : 0)) },
-                                                { text: `\n(${fmtMoeda(state._lance ? state._lance.lanceProprio : 0)} Próprio + ${fmtMoeda(totalC)} Parcelas)`, fontSize: 9, color: '#cbd5e1', bold: false }
-                                            ],
-                                            style: 'soloTotal', alignment: 'right' 
-                                        }
+                                        { text: 'Crédito Total da Operação (com lance):', style: 'soloTotal' },
+                                        { text: fmtMoeda(creditoTotal), style: 'soloTotal', alignment: 'right' }
                                     ]
                                 ]
                             },
