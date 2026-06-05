@@ -928,6 +928,7 @@
                     
                     const valorBem = state._lance ? state._lance.cartaEfetiva : state.valorCarta;
                     const creditoLiquido = state.valorCarta - (state._lance ? state._lance.lanceProprio : 0) - (state._lance ? state._lance.lanceEmbutido : 0);
+                    const creditoTotal = creditoLiquido + (state._lance ? state._lance.lanceProprio : 0);
                     const parcelaC = state._lance ? state._lance.novaParcela : 0;
                     const totalC = state._lance ? state._lance.totalPago : 0;
                     const totalF = state._finAtivo ? state._finAtivo.totalPago : 0;
@@ -1080,7 +1081,7 @@
                                         { text: '-', style: ['tableCellR', 'tagNeutral'] }
                                     ],
                                     [
-                                        { text: 'Total Desembolsado', style: 'tableCellLabel', color: '#0f172a' },
+                                        { text: 'Custo Total', style: 'tableCellLabel', color: '#0f172a' },
                                         { text: fmtMoeda(totalC), style: 'tableCellC', fontSize: 11 },
                                         { text: fmtMoeda(totalF), style: 'tableCellF', fontSize: 11 },
                                         { ...tagRes(totalC, totalF), style: ['tableCellR', tagRes(totalC, totalF).style], fontSize: 10 }
@@ -1130,7 +1131,7 @@
                                 body: [
                                     [
                                         { text: 'Crédito Total (Carta + Próprio):', style: 'soloLabel' },
-                                        { text: fmtMoeda((valorBem - (state._lance ? state._lance.lanceProprio : 0) - (state._lance ? state._lance.lanceEmbutido : 0)) + (state._lance ? state._lance.lanceProprio : 0)), style: 'soloVal' }
+                                        { text: fmtMoeda(creditoTotal), style: 'soloVal' }
                                     ],
                                     [
                                         { text: 'Lance Próprio:', style: 'soloLabel' },
@@ -1142,7 +1143,7 @@
                                     ],
                                     [
                                         { text: 'Crédito Líquido Disponível:', style: 'soloLabel' },
-                                        { text: fmtMoeda(state._lance ? valorBem - state._lance.lanceProprio - state._lance.lanceEmbutido : valorBem), style: 'soloVal', color: '#0e7490' }
+                                        { text: fmtMoeda(creditoLiquido), style: 'soloVal', color: '#0e7490' }
                                     ],
                                     [
                                         { text: 'Prazo do Grupo:', style: 'soloLabel' },
@@ -1157,11 +1158,11 @@
                                         { text: fmtMoeda(parcelaC), style: 'soloVal' }
                                     ],
                                     [
-                                        { text: 'Custo Total da Operação:', style: 'soloTotal' },
+                                        { text: 'Custo Total + Lance:', style: 'soloTotal' },
                                         { 
                                             text: [
-                                                { text: fmtMoeda(totalC) },
-                                                { text: `\n(${fmtMoeda(state._lance ? state._lance.lanceProprio : 0)} Próprio + ${fmtMoeda(totalC - (state._lance ? state._lance.lanceProprio : 0))} Parcelas)`, fontSize: 9, color: '#cbd5e1', bold: false }
+                                                { text: fmtMoeda(totalC + (state._lance ? state._lance.lanceProprio : 0)) },
+                                                { text: `\n(${fmtMoeda(state._lance ? state._lance.lanceProprio : 0)} Próprio + ${fmtMoeda(totalC)} Parcelas)`, fontSize: 9, color: '#cbd5e1', bold: false }
                                             ],
                                             style: 'soloTotal', alignment: 'right' 
                                         }
