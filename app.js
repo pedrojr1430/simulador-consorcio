@@ -391,14 +391,34 @@
 
         // 7. Dashboard KPIs
         $('#kpi-valor-carta').textContent = Calculator.formatarMoeda(valorCarta);
-        $('#kpi-valor-parcela').textContent = Calculator.formatarMoeda(lance.novaParcela);
-        $('#kpi-valor-prazo').textContent = `${lance.novoPrazo} meses`;
-        $('#kpi-valor-economia').textContent = Calculator.formatarMoeda(Math.max(0, economia));
-        if (economia > 0) {
-            $('#kpi-economia').classList.add('positive');
-        } else {
-            $('#kpi-economia').classList.remove('positive');
+        
+        const elLance = $('#kpi-valor-lance');
+        if (elLance) {
+            elLance.textContent = Calculator.formatarMoeda(lance.totalLanceOfertado);
+            const elLanceComp = $('#kpi-lance-comp');
+            if (elLanceComp) {
+                elLanceComp.textContent = `(${Calculator.formatarMoeda(lance.lanceProprio)} Próprio + ${Calculator.formatarMoeda(lance.lanceEmbutido)} Emb.)`;
+            }
         }
+
+        const elParcela = $('#kpi-valor-parcela');
+        if (elParcela) elParcela.textContent = Calculator.formatarMoeda(lance.novaParcela);
+
+        const elEco = $('#kpi-valor-economia');
+        if (elEco) {
+            elEco.textContent = Calculator.formatarMoeda(Math.max(0, economia));
+            if (economia > 0) {
+                $('#kpi-economia').classList.add('positive');
+            } else {
+                $('#kpi-economia').classList.remove('positive');
+            }
+        }
+
+        const elCredLiq = $('#kpi-valor-credito-liq');
+        if (elCredLiq) elCredLiq.textContent = Calculator.formatarMoeda(lance.cartaEfetiva);
+
+        const elPoderCompra = $('#kpi-valor-poder-compra');
+        if (elPoderCompra) elPoderCompra.textContent = Calculator.formatarMoeda(lance.cartaEfetiva + lance.lanceProprio);
 
         if (finAtivo && finAtivo.tabela) {
         }  // 9. Store calculated data for charts
