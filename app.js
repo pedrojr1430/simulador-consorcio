@@ -668,7 +668,7 @@
                 { label: 'Juros', value: 0, color: '#ef4444' },
                 { label: 'Lance (Próprio)', value: lanceVal, color: '#f0b429' }
             ];
-            $('#donut-total-consorcio').textContent = Calculator.formatarMoeda(lance.totalPago);
+            $('#donut-total-consorcio').textContent = Calculator.formatarMoeda(lance.totalPago + lanceVal);
         } else {
             const lance = state._lance || Calculator.calcularLance(state.valorCarta, state.taxaAdmin, state.fundoReserva, state.prazo, state.lanceProprio, state.lanceEmbutido, state.abatimento, state.taxaCorrecao);
             const fin = state._fin || Calculator.calcularFinanciamento(lance.cartaEfetiva, state.lanceProprio, state.taxaJuros, state.prazoFinanciamento);
@@ -682,7 +682,7 @@
                 { label: 'Juros (Total)', value: juros, color: '#ef4444' },
                 { label: 'Entrada', value: entrada, color: '#f0b429' }
             ];
-            $('#donut-total-financiamento').textContent = Calculator.formatarMoeda(finAtivo.totalPago);
+            $('#donut-total-financiamento').textContent = Calculator.formatarMoeda(finAtivo.totalPago + entrada);
         }
 
         const data = segments.filter(s => s.value > 0);
@@ -910,7 +910,7 @@
 
                 try {
                     const overlay = $('#pdf-loading-overlay');
-                    if (overlay) overlay.classList.add('active');
+                    if (overlay) overlay.style.display = 'flex';
                     
                     // Allow UI to render the overlay before freezing thread
                     await new Promise(r => setTimeout(r, 100));
@@ -1192,7 +1192,7 @@
                     alert('Erro ao gerar a apresentação em PDF. Verifique o console.');
                 } finally {
                     const overlay = $('#pdf-loading-overlay');
-                    if (overlay) overlay.classList.remove('active');
+                    if (overlay) overlay.style.display = 'none';
                 }
 
                 btnExportPdf.innerHTML = originalText;
