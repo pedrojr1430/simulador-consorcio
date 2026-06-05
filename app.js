@@ -915,9 +915,9 @@
                         console.error('Falha ao comunicar com IA', e);
                     }
 
-                    // ── 2. GERAR O PDF VIA HTML2PDF ──
+                    // ── 2. GERAR O PDF (PDFMAKE VETORIAL NATIVO) ──
                     const fmtMoeda = (v) => Calculator.formatarMoeda(v);
-
+                    
                     const valorBem = state._lance ? state._lance.cartaEfetiva : state.valorCarta;
                     const parcelaC = state._lance ? state._lance.novaParcela : 0;
                     const totalC = state._lance ? state._lance.totalPago : 0;
@@ -926,235 +926,222 @@
                     const prazoC = state._lance ? state._lance.novoPrazo : state.prazo;
                     const prazoF = state.prazoFinanciamento || 0;
                     const taxaJuros = state.taxaJuros || 0;
-                    
                     const isComparativo = (prazoF > 0 && taxaJuros > 0);
 
-                    // Pega o gráfico
-                    let chartImg = '';
-                    if (chartInstances['canvas-evolucao-main']) chartImg = chartInstances['canvas-evolucao-main'].toBase64Image('image/png', 1.0);
-                    else if (chartInstances['canvas-evolucao']) chartImg = chartInstances['canvas-evolucao'].toBase64Image('image/png', 1.0);
-
-
-                    // CSS Interno para o PDF
-                    const pdfCSS = `
-                        <style>
-                            * { margin: 0; padding: 0; box-sizing: border-box; }
-                            body { font-family: 'Inter', 'Segoe UI', sans-serif; color: #1e293b; }
-                            .pdf-wrapper { padding: 25px; }
+                    const docDefinition = {
+                        pageSize: 'A4',
+                        pageMargins: [30, 30, 30, 30],
+                        defaultStyle: { font: 'Roboto', fontSize: 10, color: '#1e293b' },
+                        styles: {
+                            headerTitle: { fontSize: 22, bold: true, color: '#00e5ff' },
+                            headerSub: { fontSize: 10, color: '#94a3b8' },
+                            headerDate: { fontSize: 9, color: '#94a3b8', alignment: 'right' },
                             
-                            .pdf-header { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); padding: 30px 40px; color: white; display: flex; justify-content: space-between; align-items: center; margin: -40px -40px 30px -40px; }
-                            .pdf-title-box h1 { margin: 0; color: #00e5ff; font-size: 28px; font-weight: 800; letter-spacing: -0.5px; }
-                            .pdf-title-box p { margin: 5px 0 0 0; color: #94a3b8; font-size: 13px; }
-                            .pdf-date { text-align: right; color: #64748b; font-size: 11px; line-height: 1.6; }
+                            sectionTitle: { fontSize: 14, bold: true, color: '#0f172a', margin: [0, 15, 0, 10] },
                             
-                            .pdf-ia-box { background: linear-gradient(135deg, #f0f9ff 0%, #f8fafc 100%); border-left: 4px solid #0ea5e9; padding: 20px 25px; border-radius: 0 8px 8px 0; margin-bottom: 25px; }
-                            .pdf-ia-title { color: #0c4a6e; font-weight: 700; font-size: 14px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
-                            .pdf-ia-content { font-size: 12px; line-height: 1.7; color: #334155; }
-                            .pdf-ia-content p { margin-top: 0; margin-bottom: 8px; }
-                            .pdf-ia-content ul { margin: 0 0 8px 0; padding-left: 18px; }
+                            tableHeaderLine: { bold: true, fontSize: 9, color: '#ffffff', fillColor: '#0f172a', alignment: 'center', margin: [4, 6, 4, 6] },
+                            tableCellLabel: { bold: true, fontSize: 10, color: '#475569', fillColor: '#f8fafc', margin: [4, 6, 4, 6] },
+                            tableCellC: { bold: true, fontSize: 10, color: '#0e7490', alignment: 'center', margin: [4, 6, 4, 6] },
+                            tableCellF: { bold: true, fontSize: 10, color: '#be123c', alignment: 'center', margin: [4, 6, 4, 6] },
+                            tableCellR: { bold: true, fontSize: 9, alignment: 'center', margin: [4, 6, 4, 6] },
                             
-                            .pdf-section-title { font-size: 16px; font-weight: 700; color: #0f172a; margin: 0 0 15px 0; padding-bottom: 6px; border-bottom: 2px solid #0ea5e9; display: inline-block; }
-                            .pdf-section-wrap { margin-bottom: 20px; }
+                            tagWin: { color: '#166534', bold: true },
+                            tagLoss: { color: '#991b1b', bold: true },
+                            tagNeutral: { color: '#475569', bold: true },
                             
-                            /* ─── Tabela Comparativa Técnica ─── */
-                            .pdf-comp-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 12px; }
-                            .pdf-comp-table th { background: #0f172a; color: #fff; padding: 10px 14px; text-align: center; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
-                            .pdf-comp-table th:first-child { text-align: left; background: #1e293b; }
-                            .pdf-comp-table th.col-consorcio { background: #0e7490; }
-                            .pdf-comp-table th.col-financ { background: #be123c; }
-                            .pdf-comp-table td { padding: 9px 14px; border-bottom: 1px solid #e2e8f0; }
-                            .pdf-comp-table td:first-child { font-weight: 600; color: #475569; background: #f8fafc; }
-                            .pdf-comp-table td:nth-child(2) { text-align: center; color: #0e7490; font-weight: 600; }
-                            .pdf-comp-table td:nth-child(3) { text-align: center; color: #be123c; font-weight: 600; }
-                            .pdf-comp-table td:nth-child(4) { text-align: center; font-weight: 700; font-size: 11px; }
-                            .pdf-comp-table tr:last-child td { border-bottom: 2px solid #0f172a; }
-                            .tag-win { background: #dcfce7; color: #166534; padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; }
-                            .tag-loss { background: #fee2e2; color: #991b1b; padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; }
-                            .tag-neutral { background: #f1f5f9; color: #475569; padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; }
+                            soloLabel: { bold: true, color: '#475569', fontSize: 10 },
+                            soloVal: { bold: true, color: '#0f172a', fontSize: 10, alignment: 'right' },
+                            soloTotal: { bold: true, color: '#ffffff', fontSize: 11, fillColor: '#0e7490', margin: [5, 8, 5, 8] },
                             
-                            /* ─── Card Solo Consórcio ─── */
-                            .pdf-card-solo { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 25px; max-width: 420px; margin: 0 auto 20px auto; }
-                            .pdf-card-solo h3 { color: #0e7490; font-size: 15px; margin: 0 0 15px 0; padding-bottom: 8px; border-bottom: 2px solid #0e7490; }
-                            .pdf-solo-row { display: flex; justify-content: space-between; font-size: 12px; padding: 7px 0; border-bottom: 1px dashed #e2e8f0; }
-                            .pdf-solo-row:last-of-type { border: none; }
-                            .pdf-solo-label { color: #475569; font-weight: 600; }
-                            .pdf-solo-val { color: #0f172a; font-weight: 500; }
-                            .pdf-solo-total { margin-top: 12px; background: linear-gradient(135deg, #0e7490, #0ea5e9); color: #fff; padding: 12px 16px; border-radius: 6px; display: flex; justify-content: space-between; font-weight: 700; font-size: 14px; }
-                            
-                            /* ─── Veredito ─── */
-                            .pdf-verdict { background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border: 1px solid #10b981; border-radius: 8px; padding: 18px; text-align: center; margin-bottom: 20px; page-break-inside: avoid; }
-                            .pdf-verdict-title { font-size: 10px; font-weight: 700; color: #047857; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 5px 0; }
-                            .pdf-verdict-val { font-size: 24px; font-weight: 800; color: #059669; margin: 0; }
-                            .pdf-verdict-sub { font-size: 11px; color: #065f46; margin-top: 4px; }
-                            
-
-                            
-                            .pdf-footer { text-align: center; font-size: 9px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 10px; margin-top: 15px; line-height: 1.4; }
-                        </style>
-                    `;
-
-                    // IA HTML
-                    const iaHtml = iaText ? `
-                        <div class="pdf-ia-box">
-                            <div class="pdf-ia-title">&#128300; Parecer Técnico — Inteligência Artificial</div>
-                            <div class="pdf-ia-content">${iaText}</div>
-                        </div>
-                    ` : '';
-
-                    // Cards / Tabela Comparativa HTML
-                    let cardsHtml = '';
-                    let verdictHtml = '';
-
-                    if (isComparativo) {
-                        // Calcular indicadores técnicos
-                        const custoJurosF = state._finAtivo ? state._finAtivo.totalJuros : 0;
-                        const custoAdmC = state._lance ? (state._lance.totalAdmin + state._lance.totalReserva) : 0;
-                        const diffParcela = parcelaF - parcelaC;
-                        const diffTotal = totalF - totalC;
-                        const cetC = state._lance ? state._lance.cetConsorcio : 0;
-
-                        function tagResult(valC, valF, lowerWins = true) {
-                            if (lowerWins) {
-                                if (valC < valF) return '<span class="tag-win">&#10003; VANTAGEM</span>';
-                                if (valC > valF) return '<span class="tag-loss">&#10007; DESVANTAGEM</span>';
-                            } else {
-                                if (valC > valF) return '<span class="tag-win">&#10003; VANTAGEM</span>';
-                                if (valC < valF) return '<span class="tag-loss">&#10007; DESVANTAGEM</span>';
+                            verdictTitle: { fontSize: 9, bold: true, color: '#047857', alignment: 'center', margin: [0,0,0,2] },
+                            verdictVal: { fontSize: 20, bold: true, color: '#059669', alignment: 'center', margin: [0,0,0,2] },
+                            verdictSub: { fontSize: 10, color: '#065f46', alignment: 'center' }
+                        },
+                        content: [
+                            // CABEÇALHO
+                            {
+                                table: {
+                                    widths: ['*'],
+                                    body: [
+                                        [
+                                            {
+                                                fillColor: '#0f172a',
+                                                border: [false, false, false, false],
+                                                margin: [20, 20, 20, 20],
+                                                columns: [
+                                                    {
+                                                        width: '*',
+                                                        stack: [
+                                                            { text: 'ConsórcioPro', style: 'headerTitle' },
+                                                            { text: 'Análise Técnica Comparativa de Viabilidade Financeira', style: 'headerSub' }
+                                                        ]
+                                                    },
+                                                    {
+                                                        width: 'auto',
+                                                        stack: [
+                                                            { text: `Data: ${new Date().toLocaleDateString('pt-BR')}`, style: 'headerDate' }
+                                                        ]
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    ]
+                                },
+                                margin: [-30, -30, -30, 20]
                             }
-                            return '<span class="tag-neutral">= EQUIVALENTE</span>';
-                        }
-
-                        cardsHtml = `
-                            <table class="pdf-comp-table">
-                                <thead>
-                                    <tr>
-                                        <th style="width: 30%;">Indicador</th>
-                                        <th class="col-consorcio" style="width: 25%;">Consórcio</th>
-                                        <th class="col-financ" style="width: 25%;">Financiamento</th>
-                                        <th style="width: 20%;">Resultado</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>Crédito Contratado</td>
-                                        <td>${fmtMoeda(valorBem)}</td>
-                                        <td>${fmtMoeda(valorBem)}</td>
-                                        <td><span class="tag-neutral">= IGUAL</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Prazo da Operação</td>
-                                        <td>${prazoC} meses</td>
-                                        <td>${prazoF} meses</td>
-                                        <td>${tagResult(prazoC, prazoF)}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Parcela Mensal</td>
-                                        <td>${fmtMoeda(parcelaC)}</td>
-                                        <td>${fmtMoeda(parcelaF)}</td>
-                                        <td>${tagResult(parcelaC, parcelaF)}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Custo com Juros / Taxas</td>
-                                        <td>${fmtMoeda(custoAdmC)}</td>
-                                        <td>${fmtMoeda(custoJurosF)}</td>
-                                        <td>${tagResult(custoAdmC, custoJurosF)}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Taxa Efetiva (CET)</td>
-                                        <td>${Calculator.formatarNumero(cetC, 2)}%</td>
-                                        <td>${taxaJuros}% a.a.</td>
-                                        <td>${tagResult(cetC, taxaJuros)}</td>
-                                    </tr>
-                                    <tr style="background: #f8fafc; font-size: 13px;">
-                                        <td style="font-weight: 800; color: #0f172a;">CUSTO TOTAL FINAL</td>
-                                        <td style="font-size: 14px;">${fmtMoeda(totalC)}</td>
-                                        <td style="font-size: 14px;">${fmtMoeda(totalF)}</td>
-                                        <td>${tagResult(totalC, totalF)}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        `;
-                        if (economia > 0) {
-                            const econPct = totalF > 0 ? ((economia / totalF) * 100).toFixed(1) : '0.0';
-                            verdictHtml = `
-                                <div class="pdf-verdict">
-                                    <p class="pdf-verdict-title">Economia Total Projetada com o Consórcio</p>
-                                    <p class="pdf-verdict-val">+ ${fmtMoeda(economia)}</p>
-                                    <p class="pdf-verdict-sub">Representa ${econPct}% de redução sobre o custo do financiamento</p>
-                                </div>
-                            `;
-                        }
-                    } else {
-                        cardsHtml = `
-                            <table class="pdf-comp-table" style="max-width: 550px; margin: 0 auto 20px auto;">
-                                <thead>
-                                    <tr>
-                                        <th colspan="2" style="text-align: center; font-size: 14px; background: #0e7490;">Plano Estruturado — Consórcio</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>Crédito (Capital)</td>
-                                        <td style="text-align: right; color: #0f172a; font-weight: 700;">${fmtMoeda(valorBem)}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Prazo do Grupo</td>
-                                        <td style="text-align: right; color: #0f172a; font-weight: 700;">${prazoC} meses</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Taxa Administrativa</td>
-                                        <td style="text-align: right; color: #0f172a; font-weight: 700;">${state.taxaAdmin}% total</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Lance Ofertado</td>
-                                        <td style="text-align: right; color: #0f172a; font-weight: 700;">${fmtMoeda(state._lance ? state._lance.totalLanceOfertado : 0)}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Parcela Mensal</td>
-                                        <td style="text-align: right; color: #0f172a; font-weight: 700;">${fmtMoeda(parcelaC)}</td>
-                                    </tr>
-                                    <tr style="background: linear-gradient(135deg, #0e7490, #0ea5e9);">
-                                        <td style="font-weight: 800; border: none; color: #fff; background: transparent;">Custo Total da Operação</td>
-                                        <td style="text-align: right; font-weight: 800; border: none; color: #fff; background: transparent;">${fmtMoeda(totalC)}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        `;
-                    }
-
-
-                    const fullHtml = `
-                        ${pdfCSS}
-                        <div class="pdf-wrapper" style="font-family: 'Inter', 'Segoe UI', sans-serif; min-width: 800px; margin: 0 auto; background: #fff; padding: 30px; box-sizing: border-box;">
-                            <div class="pdf-header">
-                                <div class="pdf-title-box">
-                                    <h1>ConsórcioPro</h1>
-                                    <p>Análise Técnica Comparativa de Viabilidade Financeira</p>
-                                </div>
-                                <div class="pdf-date">
-                                    Data: ${new Date().toLocaleDateString('pt-BR')}<br>
-                                </div>
-                            </div>
-                            
-                            <div class="pdf-section-wrap">
-                                <h2 class="pdf-section-title">${isComparativo ? 'Quadro Comparativo Técnico' : 'Resumo Financeiro da Operação'}</h2>
-                            </div>
-                            ${cardsHtml}
-                            ${verdictHtml}
-                        </div>
-                    `;
-
-                    // Gerar o PDF usando html2pdf usando a string HTML diretamente, sem mexer no DOM visível
-                    const opt = {
-                        margin:       [10, 0, 10, 0],
-                        filename:     'Proposta_Comercial_ConsorcioPro.pdf',
-                        image:        { type: 'jpeg', quality: 1.0 },
-                        html2canvas:  { scale: 2, useCORS: true, windowWidth: 800 },
-                        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                        pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
+                        ]
                     };
 
-                    await html2pdf().set(opt).from(fullHtml).save();
+                    // TABELAS
+                    if (isComparativo) {
+                        const custoJurosF = state._finAtivo ? state._finAtivo.totalJuros : 0;
+                        const custoAdmC = state._lance ? (state._lance.totalAdmin + state._lance.totalReserva) : 0;
+                        const cetC = state._lance ? state._lance.cetConsorcio : 0;
+                        const diffTotal = totalF - totalC;
+
+                        const tagRes = (vC, vF, lowerWins = true) => {
+                            if (lowerWins) {
+                                if (vC < vF) return { text: '✓ VANTAGEM', style: 'tagWin' };
+                                if (vC > vF) return { text: '✗ DESVANTAGEM', style: 'tagLoss' };
+                            } else {
+                                if (vC > vF) return { text: '✓ VANTAGEM', style: 'tagWin' };
+                                if (vC < vF) return { text: '✗ DESVANTAGEM', style: 'tagLoss' };
+                            }
+                            return { text: '= EQUIVALENTE', style: 'tagNeutral' };
+                        };
+
+                        docDefinition.content.push({ text: 'QUADRO COMPARATIVO TÉCNICO', style: 'sectionTitle' });
+                        docDefinition.content.push({
+                            table: {
+                                headerRows: 1,
+                                widths: ['*', 'auto', 'auto', 'auto'],
+                                body: [
+                                    [
+                                        { text: 'INDICADOR', style: 'tableHeaderLine', fillColor: '#1e293b', alignment: 'left' },
+                                        { text: 'CONSÓRCIO', style: 'tableHeaderLine', fillColor: '#0e7490' },
+                                        { text: 'FINANCIAMENTO', style: 'tableHeaderLine', fillColor: '#be123c' },
+                                        { text: 'RESULTADO', style: 'tableHeaderLine' }
+                                    ],
+                                    [
+                                        { text: 'Crédito Contratado', style: 'tableCellLabel' },
+                                        { text: fmtMoeda(valorBem), style: 'tableCellC' },
+                                        { text: fmtMoeda(valorBem), style: 'tableCellF' },
+                                        { text: '= IGUAL', style: ['tableCellR', 'tagNeutral'] }
+                                    ],
+                                    [
+                                        { text: 'Prazo da Operação', style: 'tableCellLabel' },
+                                        { text: `${prazoC} meses`, style: 'tableCellC' },
+                                        { text: `${prazoF} meses`, style: 'tableCellF' },
+                                        { ...tagRes(prazoC, prazoF), style: ['tableCellR', tagRes(prazoC, prazoF).style] }
+                                    ],
+                                    [
+                                        { text: 'Parcela Mensal', style: 'tableCellLabel' },
+                                        { text: fmtMoeda(parcelaC), style: 'tableCellC' },
+                                        { text: fmtMoeda(parcelaF), style: 'tableCellF' },
+                                        { ...tagRes(parcelaC, parcelaF), style: ['tableCellR', tagRes(parcelaC, parcelaF).style] }
+                                    ],
+                                    [
+                                        { text: 'Custo com Juros / Taxas', style: 'tableCellLabel' },
+                                        { text: fmtMoeda(custoAdmC), style: 'tableCellC' },
+                                        { text: fmtMoeda(custoJurosF), style: 'tableCellF' },
+                                        { ...tagRes(custoAdmC, custoJurosF), style: ['tableCellR', tagRes(custoAdmC, custoJurosF).style] }
+                                    ],
+                                    [
+                                        { text: 'Taxa Efetiva (CET)', style: 'tableCellLabel' },
+                                        { text: `${Calculator.formatarNumero(cetC, 2)}%`, style: 'tableCellC' },
+                                        { text: `${taxaJuros}% a.a.`, style: 'tableCellF' },
+                                        { ...tagRes(cetC, taxaJuros), style: ['tableCellR', tagRes(cetC, taxaJuros).style] }
+                                    ],
+                                    [
+                                        { text: 'CUSTO TOTAL FINAL', style: 'tableCellLabel', color: '#0f172a' },
+                                        { text: fmtMoeda(totalC), style: 'tableCellC', fontSize: 11 },
+                                        { text: fmtMoeda(totalF), style: 'tableCellF', fontSize: 11 },
+                                        { ...tagRes(totalC, totalF), style: ['tableCellR', tagRes(totalC, totalF).style], fontSize: 10 }
+                                    ]
+                                ]
+                            },
+                            layout: {
+                                hLineWidth: () => 1,
+                                vLineWidth: () => 0,
+                                hLineColor: () => '#e2e8f0',
+                                paddingLeft: () => 0,
+                                paddingRight: () => 0
+                            },
+                            margin: [0, 0, 0, 20]
+                        });
+
+                        if (diffTotal > 0) {
+                            const econPct = totalF > 0 ? ((diffTotal / totalF) * 100).toFixed(1) : '0.0';
+                            docDefinition.content.push({
+                                table: {
+                                    widths: ['*'],
+                                    body: [
+                                        [
+                                            {
+                                                fillColor: '#ecfdf5',
+                                                border: [true, true, true, true],
+                                                borderColor: ['#10b981', '#10b981', '#10b981', '#10b981'],
+                                                margin: [15, 15, 15, 15],
+                                                stack: [
+                                                    { text: 'ECONOMIA TOTAL PROJETADA COM O CONSÓRCIO', style: 'verdictTitle' },
+                                                    { text: `+ ${fmtMoeda(diffTotal)}`, style: 'verdictVal' },
+                                                    { text: `Representa ${econPct}% de redução sobre o custo do financiamento`, style: 'verdictSub' }
+                                                ]
+                                            }
+                                        ]
+                                    ]
+                                },
+                                layout: { defaultBorder: true },
+                                margin: [0, 0, 0, 20]
+                            });
+                        }
+                    } else {
+                        docDefinition.content.push({ text: 'PLANO ESTRUTURADO — CONSÓRCIO', style: 'sectionTitle' });
+                        docDefinition.content.push({
+                            table: {
+                                widths: ['*', 'auto'],
+                                body: [
+                                    [
+                                        { text: 'Crédito (Capital):', style: 'soloLabel' },
+                                        { text: fmtMoeda(valorBem), style: 'soloVal' }
+                                    ],
+                                    [
+                                        { text: 'Prazo do Grupo:', style: 'soloLabel' },
+                                        { text: `${prazoC} meses`, style: 'soloVal' }
+                                    ],
+                                    [
+                                        { text: 'Taxa Administrativa:', style: 'soloLabel' },
+                                        { text: `${state.taxaAdmin}% total`, style: 'soloVal' }
+                                    ],
+                                    [
+                                        { text: 'Lance Ofertado:', style: 'soloLabel' },
+                                        { text: fmtMoeda(state._lance ? state._lance.totalLanceOfertado : 0), style: 'soloVal' }
+                                    ],
+                                    [
+                                        { text: 'Parcela Mensal:', style: 'soloLabel' },
+                                        { text: fmtMoeda(parcelaC), style: 'soloVal' }
+                                    ],
+                                    [
+                                        { text: 'Custo Total da Operação:', style: 'soloTotal' },
+                                        { text: fmtMoeda(totalC), style: 'soloTotal', alignment: 'right' }
+                                    ]
+                                ]
+                            },
+                            layout: {
+                                hLineWidth: (i, node) => (i === node.table.body.length - 1 || i === node.table.body.length) ? 0 : 1,
+                                vLineWidth: () => 0,
+                                hLineColor: () => '#e2e8f0',
+                                paddingLeft: () => 5,
+                                paddingRight: () => 5,
+                                paddingTop: () => 8,
+                                paddingBottom: () => 8
+                            },
+                            margin: [0, 0, 0, 20]
+                        });
+                    }
+
+                    // ── 3. GERAR E BAIXAR (PDFMAKE NATIVO) ──
+                    pdfMake.createPdf(docDefinition).download('Proposta_Comercial_ConsorcioPro.pdf');
 
                 } catch (err) {
                     console.error('Erro ao gerar PDF:', err);
