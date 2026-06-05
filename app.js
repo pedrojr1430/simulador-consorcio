@@ -925,6 +925,7 @@
                     const fmtMoeda = (v) => Calculator.formatarMoeda(v);
                     
                     const valorBem = state._lance ? state._lance.cartaEfetiva : state.valorCarta;
+                    const creditoLiquido = state.valorCarta - (state._lance ? state._lance.lanceProprio : 0) - (state._lance ? state._lance.lanceEmbutido : 0);
                     const parcelaC = state._lance ? state._lance.novaParcela : 0;
                     const totalC = state._lance ? state._lance.totalPago : 0;
                     const totalF = state._finAtivo ? state._finAtivo.totalPago : 0;
@@ -1030,8 +1031,8 @@
                                     ],
                                     [
                                         { text: 'Crédito Contratado', style: 'tableCellLabel' },
-                                        { text: fmtMoeda(valorBem), style: 'tableCellC' },
-                                        { text: fmtMoeda(valorBem), style: 'tableCellF' },
+                                        { text: fmtMoeda(creditoLiquido), style: 'tableCellC' },
+                                        { text: fmtMoeda(creditoLiquido), style: 'tableCellF' },
                                         { text: '= IGUAL', style: ['tableCellR', 'tagNeutral'] }
                                     ],
                                     [
@@ -1072,26 +1073,14 @@
                                     ],
                                     [
                                         { text: 'Taxa Efetiva (CET)', style: 'tableCellLabel' },
-                                        { text: `${Calculator.formatarNumero(cetC, 2)}%`, style: 'tableCellC' },
+                                        { text: `${Calculator.formatarNumero(state.taxaAdmin || 0, 2)}% (TOTAL)`, style: 'tableCellC' },
                                         { text: `${taxaJuros}% a.a.`, style: 'tableCellF' },
-                                        { ...tagRes(cetC, taxaJuros), style: ['tableCellR', tagRes(cetC, taxaJuros).style] }
+                                        { text: '-', style: ['tableCellR', 'tagNeutral'] }
                                     ],
                                     [
                                         { text: 'Total Desembolsado', style: 'tableCellLabel', color: '#0f172a' },
-                                        { 
-                                            text: [
-                                                { text: fmtMoeda(totalC), fontSize: 11 },
-                                                { text: `\n(Próprio: ${fmtMoeda(state._lance ? state._lance.lanceProprio : 0)} + Parc: ${fmtMoeda(totalC - (state._lance ? state._lance.lanceProprio : 0))})`, fontSize: 8, color: '#475569', bold: false }
-                                            ],
-                                            style: 'tableCellC'
-                                        },
-                                        { 
-                                            text: [
-                                                { text: fmtMoeda(totalF), fontSize: 11 },
-                                                { text: `\n(Entrada: ${fmtMoeda(state._lance ? state._lance.lanceProprio : 0)} + Parc: ${fmtMoeda(totalF - (state._lance ? state._lance.lanceProprio : 0))})`, fontSize: 8, color: '#475569', bold: false }
-                                            ],
-                                            style: 'tableCellF'
-                                        },
+                                        { text: fmtMoeda(totalC), style: 'tableCellC', fontSize: 11 },
+                                        { text: fmtMoeda(totalF), style: 'tableCellF', fontSize: 11 },
                                         { ...tagRes(totalC, totalF), style: ['tableCellR', tagRes(totalC, totalF).style], fontSize: 10 }
                                     ]
                                 ]
