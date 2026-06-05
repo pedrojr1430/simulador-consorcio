@@ -525,7 +525,7 @@
                 </div>
 
                 <div class="dashboard-grid">
-                <!-- KPI Cards -->
+                <!-- KPI Cards - Linha 1 -->
                 <div class="kpi-row">
                     <div class="glass-card kpi-card" id="kpi-carta">
                         <div class="kpi-icon blue">
@@ -536,22 +536,23 @@
                             <span class="kpi-value" id="kpi-valor-carta">R$ 100.000,00</span>
                         </div>
                     </div>
-                    <div class="glass-card kpi-card" id="kpi-parcela">
+                    <div class="glass-card kpi-card" id="kpi-lance">
                         <div class="kpi-icon emerald">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
                         </div>
                         <div class="kpi-info">
-                            <span class="kpi-label">Parcela Pós-Lance</span>
-                            <span class="kpi-value" id="kpi-valor-parcela">R$ 413,00</span>
+                            <span class="kpi-label">Lance Total</span>
+                            <span class="kpi-value" id="kpi-valor-lance">R$ 0,00</span>
+                            <span class="kpi-sub" id="kpi-lance-comp" style="font-size: 11px; color: var(--text-muted); margin-top: 3px; display: block;">(R$ 0 Próprio + R$ 0 Emb.)</span>
                         </div>
                     </div>
-                    <div class="glass-card kpi-card" id="kpi-prazo">
+                    <div class="glass-card kpi-card" id="kpi-parcela">
                         <div class="kpi-icon gold">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
                         </div>
                         <div class="kpi-info">
-                            <span class="kpi-label">Prazo Restante</span>
-                            <span class="kpi-value" id="kpi-valor-prazo">200 meses</span>
+                            <span class="kpi-label">Parcela Pós-Lance</span>
+                            <span class="kpi-value" id="kpi-valor-parcela">R$ 413,00</span>
                         </div>
                     </div>
                     <div class="glass-card kpi-card" id="kpi-economia">
@@ -561,6 +562,28 @@
                         <div class="kpi-info">
                             <span class="kpi-label">Economia vs Financ.</span>
                             <span class="kpi-value" id="kpi-valor-economia">R$ 0,00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- KPI Cards - Linha 2 -->
+                <div class="kpi-row" style="margin-top: 15px;">
+                    <div class="glass-card kpi-card" id="kpi-credito-liq" style="flex: 1;">
+                        <div class="kpi-icon blue">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                        </div>
+                        <div class="kpi-info">
+                            <span class="kpi-label">Crédito Líquido (Sem Lance)</span>
+                            <span class="kpi-value" id="kpi-valor-credito-liq">R$ 0,00</span>
+                        </div>
+                    </div>
+                    <div class="glass-card kpi-card" id="kpi-poder-compra" style="flex: 1;">
+                        <div class="kpi-icon gold">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                        </div>
+                        <div class="kpi-info">
+                            <span class="kpi-label">Crédito Total (Com Lance)</span>
+                            <span class="kpi-value" id="kpi-valor-poder-compra">R$ 0,00</span>
                         </div>
                     </div>
                 </div>
@@ -627,9 +650,16 @@
         </div>
     </footer>
 
+    <!-- PDF Loading Overlay -->
+    <div id="pdf-loading-overlay" class="pdf-loading-overlay">
+        <div class="pdf-spinner"></div>
+        <p style="margin-top: 20px; font-weight: 600; color: white;">Gerando Relatório Vetorial...</p>
+        <p style="font-size: 13px; color: #cbd5e1; margin-top: 8px;">Por favor, aguarde alguns instantes.</p>
+    </div>
+
     <!-- Chart.js para gráficos modernos e interativos -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="calculator.js?v=12"></script>
-    <script src="app.js?v=12"></script>
+    <script src="calculator.js?v=13"></script>
+    <script src="app.js?v=13"></script>
 </body>
 </html>

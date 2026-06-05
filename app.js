@@ -869,53 +869,13 @@
                 btnExportPdf.style.pointerEvents = 'none';
 
                 try {
-                    // ── 1. BUSCAR PARECER DA IA ──
-                    const totalConsorcio = state._lance ? state._lance.totalPago : 0;
-                    const totalFinanciamento = state._finAtivo ? state._finAtivo.totalPago : 0;
-                    const economia = totalFinanciamento - totalConsorcio;
-                    const economiaStr = economia > 0 ? Calculator.formatarMoeda(economia) : 'R$ 0,00';
+                    const overlay = $('#pdf-loading-overlay');
+                    if (overlay) overlay.classList.add('active');
+                    
+                    // Allow UI to render the overlay before freezing thread
+                    await new Promise(r => setTimeout(r, 100));
 
-                    let lanceTextoIA = "R$ 0,00";
-                    if (state._lance && state._lance.totalLanceOfertado > 0) {
-                        let partes = [];
-                        if (state._lance.lanceProprio > 0) {
-                            partes.push(`Próprio: ${lanceModes.lanceProprio === 'pct' ? state.lanceProprio + '% (' : ''}${Calculator.formatarMoeda(state._lance.lanceProprio)}${lanceModes.lanceProprio === 'pct' ? ')' : ''}`);
-                        }
-                        if (state._lance.lanceEmbutido > 0) {
-                            partes.push(`Embutido: ${lanceModes.lanceEmbutido === 'pct' ? state.lanceEmbutido + '% (' : ''}${Calculator.formatarMoeda(state._lance.lanceEmbutido)}${lanceModes.lanceEmbutido === 'pct' ? ')' : ''}`);
-                        }
-                        lanceTextoIA = partes.join(" + ");
-                    }
-
-                    const payload = {
-                        valorCarta: Calculator.formatarMoeda(state.valorCarta),
-                        valorParcela: Calculator.formatarMoeda(state._lance ? state._lance.novaParcela : 0),
-                        prazo: state._lance ? state._lance.novoPrazo : 0,
-                        lance: lanceTextoIA,
-                        economiaTotal: economiaStr,
-                        parcelaFinanciamento: state._finAtivo && state._finAtivo.tabela && state._finAtivo.tabela[0] ? Calculator.formatarMoeda(state._finAtivo.tabela[0].parcela) : 'R$ 0,00',
-                        prazoFinanciamento: state.prazoFinanciamento || 0,
-                        totalConsorcio: Calculator.formatarMoeda(totalConsorcio),
-                        totalFinanciamento: Calculator.formatarMoeda(totalFinanciamento),
-                        isComparativo: (state.prazoFinanciamento > 0 && state.taxaJuros > 0)
-                    };
-
-                    let iaText = '';
-                    try {
-                        const response = await fetch('/api/generate-pitch', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(payload)
-                        });
-                        if (response.ok) {
-                            const data = await response.json();
-                            iaText = data.text;
-                        }
-                    } catch (e) {
-                        console.error('Falha ao comunicar com IA', e);
-                    }
-
-                    // ── 2. GERAR O PDF (PDFMAKE VETORIAL NATIVO) ──
+                    // ── 1. GERAR O PDF (PDFMAKE VETORIAL NATIVO) ──
                     const fmtMoeda = (v) => Calculator.formatarMoeda(v);
                     
                     const valorBem = state._lance ? state._lance.cartaEfetiva : state.valorCarta;
@@ -1102,7 +1062,7 @@
                                 widths: ['*', 'auto'],
                                 body: [
                                     [
-                                        { text: 'Crédito (Capital):', style: 'soloLabel' },
+                                        { text: 'Crédito (Capital Base):', style: 'soloLabel' },
                                         { text: fmtMoeda(valorBem), style: 'soloVal' }
                                     ],
                                     [
@@ -1114,8 +1074,22 @@
                                         { text: `${state.taxaAdmin}% total`, style: 'soloVal' }
                                     ],
                                     [
-                                        { text: 'Lance Ofertado:', style: 'soloLabel' },
-                                        { text: fmtMoeda(state._lance ? state._lance.totalLanceOfertado : 0), style: 'soloVal' }
+                                        { text: 'Lance Total Ofertado:', style: 'soloLabel' },
+                                        { 
+                                            text: [
+                                                { text: fmtMoeda(state._lance ? state._lance.totalLanceOfertado : 0) },
+                                                { text: `\n(${fmtMoeda(state._lance ? state._lance.lanceProprio : 0)} Próprio + ${fmtMoeda(state._lance ? state._lance.lanceEmbutido : 0)} Emb.)`, fontSize: 9, color: '#64748b', bold: false }
+                                            ],
+                                            style: 'soloVal' 
+                                        }
+                                    ],
+                                    [
+                                        { text: 'Crédito Líquido (Sem Lance):', style: 'soloLabel' },
+                                        { text: fmtMoeda(state._lance ? state._lance.cartaEfetiva : valorBem), style: 'soloVal', color: '#0e7490' }
+                                    ],
+                                    [
+                                        { text: 'Poder de Compra (Líquido + Próprio):', style: 'soloLabel' },
+                                        { text: fmtMoeda(state._lance ? state._lance.cartaEfetiva + state._lance.lanceProprio : valorBem), style: 'soloVal', color: '#b45309' }
                                     ],
                                     [
                                         { text: 'Parcela Mensal:', style: 'soloLabel' },
@@ -1146,6 +1120,9 @@
                 } catch (err) {
                     console.error('Erro ao gerar PDF:', err);
                     alert('Erro ao gerar a apresentação em PDF. Verifique o console.');
+                } finally {
+                    const overlay = $('#pdf-loading-overlay');
+                    if (overlay) overlay.classList.remove('active');
                 }
 
                 btnExportPdf.innerHTML = originalText;
