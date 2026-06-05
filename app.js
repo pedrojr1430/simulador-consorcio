@@ -321,8 +321,15 @@
         if (elDetalheFinMain) elDetalheFinMain.textContent = detalheFinStr;
 
         // 5. Comparação
+        const isComparativo = (prazoFinanciamento > 0 && taxaJuros > 0);
+        
         const totalConsorcio = lance.totalPago;
-        const totalFinanciamento = finAtivo.totalPago;
+        const totalFinanciamento = isComparativo ? finAtivo.totalPago : 0;
+        const dispParcelaFin = isComparativo ? parcelaFin : 0;
+        const dispPrazoFin = isComparativo ? prazoFinanciamento : 0;
+        const dispEntradaFin = isComparativo ? entrada : 0;
+        const dispJurosFin = isComparativo ? finAtivo.totalJuros : 0;
+
         const maxTotal = Math.max(totalConsorcio, totalFinanciamento, 1);
 
         $('#comp-total-consorcio').textContent = Calculator.formatarMoeda(totalConsorcio);
@@ -334,27 +341,26 @@
         const labelCompParcela = $('#label-comp-parcela');
         if (labelCompParcela) labelCompParcela.textContent = taxaCorrecao > 0 ? 'Parcela Inicial' : 'Parcela Mensal';
         $('#tab-parcela-consorcio').textContent = Calculator.formatarMoeda(lance.primeiraParcela);
-        $('#tab-parcela-financiamento').textContent = Calculator.formatarMoeda(parcelaFin);
+        $('#tab-parcela-financiamento').textContent = Calculator.formatarMoeda(dispParcelaFin);
         $('#tab-prazo-consorcio').textContent = `${lance.novoPrazo} meses`;
-        $('#tab-prazo-financiamento').textContent = `${prazoFinanciamento} meses`;
+        $('#tab-prazo-financiamento').textContent = `${dispPrazoFin} meses`;
         $('#tab-lance-consorcio').textContent = Calculator.formatarMoeda(totalLance);
-        $('#tab-entrada-financiamento').textContent = Calculator.formatarMoeda(entrada);
+        $('#tab-entrada-financiamento').textContent = Calculator.formatarMoeda(dispEntradaFin);
         $('#tab-custo-consorcio').textContent = Calculator.formatarMoeda(totalConsorcio);
         $('#tab-custo-financiamento').textContent = Calculator.formatarMoeda(totalFinanciamento);
         $('#tab-juros-consorcio').textContent = Calculator.formatarMoeda(lance.custoConsorcio);
-        $('#tab-juros-financiamento').textContent = Calculator.formatarMoeda(finAtivo.totalJuros);
+        $('#tab-juros-financiamento').textContent = Calculator.formatarMoeda(dispJurosFin);
 
         // Highlight winner
-        highlightWinner('#tab-parcela-consorcio', '#tab-parcela-financiamento', lance.novaParcela, parcelaFin, true);
-        highlightWinner('#tab-prazo-consorcio', '#tab-prazo-financiamento', lance.novoPrazo, prazoFinanciamento, true);
+        highlightWinner('#tab-parcela-consorcio', '#tab-parcela-financiamento', lance.novaParcela, dispParcelaFin, true);
+        highlightWinner('#tab-prazo-consorcio', '#tab-prazo-financiamento', lance.novoPrazo, dispPrazoFin, true);
         highlightWinner('#tab-custo-consorcio', '#tab-custo-financiamento', totalConsorcio, totalFinanciamento, true);
-        highlightWinner('#tab-juros-consorcio', '#tab-juros-financiamento', lance.custoConsorcio, finAtivo.totalJuros, true);
+        highlightWinner('#tab-juros-consorcio', '#tab-juros-financiamento', lance.custoConsorcio, dispJurosFin, true);
 
         // 6. Veredito
         const economia = totalFinanciamento - totalConsorcio;
 
         // Comparador verdict
-        const isComparativo = (prazoFinanciamento > 0 && taxaJuros > 0);
         const verdictBox = $('#verdict-box');
         if (verdictBox) {
             if (economia > 0) {
