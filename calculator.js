@@ -148,7 +148,7 @@ const Calculator = (() => {
      * Converte taxa anual para taxa mensal equivalente.
      */
     function taxaMensal(taxaAnual) {
-        return Math.pow(1 + taxaAnual / 100, 1 / 12) - 1;
+        return (taxaAnual / 100) / 12;
     }
 
     function calcularPMT(saldo, i, prazo) {

@@ -320,13 +320,13 @@
         const isComparativo = (prazoFinanciamento > 0 && taxaJuros > 0);
         
         const totalConsorcio = lance.totalPago;
-        const totalFinanciamento = isComparativo ? finAtivo.totalJuros : 0;
+        const totalFinanciamento = isComparativo ? (finAtivo.totalPago - entrada) : 0;
         const dispParcelaFin = isComparativo ? parcelaFin : 0;
         const dispPrazoFin = isComparativo ? prazoFinanciamento : 0;
         const dispEntradaFin = isComparativo ? entrada : 0;
         const dispJurosFin = isComparativo ? finAtivo.totalJuros : 0;
 
-        const maxTotal = Math.max(totalConsorcio, totalFinanciamento, 1);
+        const maxTotal = Math.max(totalConsorcio + lance.lanceProprio, totalFinanciamento + dispEntradaFin, 1);
 
         $('#comp-total-consorcio').textContent = Calculator.formatarMoeda(totalConsorcio);
         $('#comp-total-financiamento').textContent = Calculator.formatarMoeda(totalFinanciamento);
@@ -373,7 +373,7 @@
         highlightWinner('#tab-custo-lance-consorcio', '#tab-custo-entrada-financiamento', totalConsorcio + lance.lanceProprio, totalFinanciamento + dispEntradaFin, true);
 
         // 6. Veredito
-        const economia = totalFinanciamento - totalConsorcio;
+        const economia = (totalFinanciamento + dispEntradaFin) - (totalConsorcio + lance.lanceProprio);
 
         // Comparador verdict
         const verdictBox = $('#verdict-box');
@@ -930,7 +930,7 @@
                     const creditoTotal = creditoLiquido + (state._lance ? state._lance.lanceProprio : 0);
                     const parcelaC = state._lance ? state._lance.novaParcela : 0;
                     const totalC = state._lance ? state._lance.totalPago : 0;
-                    const totalF = state._finAtivo ? state._finAtivo.totalJuros : 0;
+                    const totalF = state._finAtivo ? (state._finAtivo.totalPago - (state._fin ? state._fin.entrada : 0)) : 0;
                     const parcelaF = state._finAtivo ? (state._finAtivo.tabela[0]?.parcela || 0) : 0;
                     const prazoC = state._lance ? state._lance.novoPrazo : state.prazo;
                     const prazoF = state.prazoFinanciamento || 0;
