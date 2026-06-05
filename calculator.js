@@ -110,7 +110,7 @@ const Calculator = (() => {
 
         const novaParcela = sim.primeiraParcela;
         const novoPrazo = sim.prazoFinal;
-        const totalPago = lanceProprio + sim.totalPago;
+        const totalPago = sim.totalPago;
 
         const basica = parcelaBasicaConsorcio(valorCarta, taxaAdmin, fundoReserva, prazo, taxaCorrecaoAnual);
 

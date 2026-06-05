@@ -224,41 +224,44 @@
                         <h2>VisÃ£o Geral</h2>
                     </div>
                     <div class="card-body">
-                        <div class="overview-metric">
-                            <div class="metric-header">
-                                <span class="metric-label">Valor da Carta</span>
-                                <span class="metric-value" id="overview-carta">R$ 100.000,00</span>
-                            </div>
-                        </div>
-                        <div class="overview-metric">
-                            <div class="metric-header">
-                                <span class="metric-label">Lance Oferecido</span>
-                                <span class="metric-value accent" id="overview-lance">R$ 30.000,00</span>
-                            </div>
-                            <div class="metric-bar">
-                                <div class="metric-bar-fill emerald" id="bar-lance" style="width: 30%"></div>
-                            </div>
-                        </div>
-                        <div class="overview-metric">
-                            <div class="metric-header">
-                                <span class="metric-label">Saldo Devedor ApÃ³s Lance</span>
-                                <span class="metric-value" id="overview-saldo">R$ 82.600,00</span>
-                            </div>
-                            <div class="metric-bar">
-                                <div class="metric-bar-fill blue" id="bar-saldo" style="width: 70%"></div>
-                            </div>
-                        </div>
-                        <div class="overview-metric">
-                            <div class="metric-header">
-                                <span class="metric-label">Total a Desembolsar</span>
-                                <span class="metric-value" id="overview-total">R$ 112.600,00</span>
-                            </div>
-                        </div>
-                         <div class="overview-metric">
-                            <div class="metric-header">
-                                <span class="metric-label">Custo Efetivo Total (%)</span>
-                                <span class="metric-value gold" id="overview-cet">18,00%</span>
-                            </div>
+                                                <!-- Tabela Comparativa na Main -->
+                        <div class="comparison-table-wrapper" style="margin-top: 0; padding: 0; overflow-x: auto;">
+                            <table class="comparison-table" id="tabela-comparativa-main" style="width: 100%; font-size: 0.85rem;">
+                                <thead>
+                                    <tr>
+                                        <th style="padding: 8px;">Critério</th>
+                                        <th class="col-consorcio" style="padding: 8px;">Consórcio</th>
+                                        <th class="col-financiamento" style="padding: 8px;">Financiamento</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td id="label-comp-parcela-main" style="padding: 8px;">Parcela Mensal</td>
+                                        <td class="col-consorcio highlight" id="tab-parcela-consorcio-main" style="padding: 8px;">R$ 0,00</td>
+                                        <td class="col-financiamento" id="tab-parcela-financiamento-main" style="padding: 8px;">R$ 0,00</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 8px;">Prazo</td>
+                                        <td class="col-consorcio" id="tab-prazo-consorcio-main" style="padding: 8px;">0 meses</td>
+                                        <td class="col-financiamento" id="tab-prazo-financiamento-main" style="padding: 8px;">0 meses</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 8px;">Entrada / Lance</td>
+                                        <td class="col-consorcio" id="tab-lance-consorcio-main" style="padding: 8px;">R$ 0,00</td>
+                                        <td class="col-financiamento" id="tab-entrada-financiamento-main" style="padding: 8px;">R$ 0,00</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 8px;">Custo Total</td>
+                                        <td class="col-consorcio" id="tab-custo-consorcio-main" style="padding: 8px;">R$ 0,00</td>
+                                        <td class="col-financiamento" id="tab-custo-financiamento-main" style="padding: 8px;">R$ 0,00</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 8px;">Juros / Taxas Pagos</td>
+                                        <td class="col-consorcio" id="tab-juros-consorcio-main" style="padding: 8px;">R$ 0,00</td>
+                                        <td class="col-financiamento" id="tab-juros-financiamento-main" style="padding: 8px;">R$ 0,00</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
 
                         <div class="divider"></div>
@@ -662,3 +665,4 @@
     <script src="app.js?v=13"></script>
 </body>
 </html>
+
