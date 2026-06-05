@@ -725,7 +725,7 @@
                         borderColor: theme.grid,
                         borderWidth: 1,
                         callbacks: {
-                            label: (ctx) => ` ${ctx.label}: ${Calculator.formatarMoeda(ctx.raw)}`
+                            label: (ctx) => ` ${Calculator.formatarMoeda(ctx.raw)}`
                         }
                     }
                 }
