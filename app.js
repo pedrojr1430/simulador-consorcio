@@ -668,10 +668,12 @@
             const admin = lance.totalAdmin;
             const reserva = lance.totalReserva;
             const lanceVal = state.lanceProprio;
+            const creditoLiquido = state.valorCarta - lance.lanceProprio - lance.lanceEmbutido;
+            const juros = Math.max(0, lance.totalPago - creditoLiquido - admin - reserva);
             segments = [
-                { label: 'Amortização (Líquido)', value: Math.max(0, lance.totalPago - admin - reserva), color: '#3b82f6' },
+                { label: 'Amortização (Líquido)', value: Math.max(0, creditoLiquido), color: '#3b82f6' },
                 { label: 'Taxas e Admin', value: admin + reserva, color: '#10b981' },
-                { label: 'Juros', value: 0, color: '#ef4444' },
+                { label: 'Juros / Correção', value: juros, color: '#ef4444' },
                 { label: 'Lance (Próprio)', value: lanceVal, color: '#f0b429' }
             ];
             $('#donut-total-consorcio').textContent = Calculator.formatarMoeda(lance.totalPago + lanceVal);
