@@ -394,7 +394,7 @@
 
         // 7. Dashboard KPIs
         const elCarta = $('#kpi-valor-carta');
-        if (elCarta) elCarta.textContent = Calculator.formatarMoeda(valorCarta);
+        if (elCarta) elCarta.textContent = Calculator.formatarMoeda((valorCarta - lance.lanceProprio - lance.lanceEmbutido) + lance.lanceProprio);
         
         const elLanceProp = $('#kpi-valor-lance-proprio');
         if (elLanceProp) elLanceProp.textContent = Calculator.formatarMoeda(lance.lanceProprio);
@@ -1014,6 +1014,24 @@
                                         { text: '= IGUAL', style: ['tableCellR', 'tagNeutral'] }
                                     ],
                                     [
+                                        { text: 'Lance / Entrada Ofertada', style: 'tableCellLabel' },
+                                        { 
+                                            text: [
+                                                { text: fmtMoeda(state._lance ? state._lance.totalLanceOfertado : 0) },
+                                                { text: `\n(${fmtMoeda(state._lance ? state._lance.lanceProprio : 0)} Próprio + ${fmtMoeda(state._lance ? state._lance.lanceEmbutido : 0)} Emb.)`, fontSize: 8, color: '#475569', bold: false }
+                                            ],
+                                            style: 'tableCellC'
+                                        },
+                                        { 
+                                            text: [
+                                                { text: fmtMoeda(state._lance ? state._lance.lanceProprio : 0) },
+                                                { text: `\n(Entrada em Dinheiro)`, fontSize: 8, color: '#475569', bold: false }
+                                            ],
+                                            style: 'tableCellF'
+                                        },
+                                        { text: '-', style: ['tableCellR', 'tagNeutral'] }
+                                    ],
+                                    [
                                         { text: 'Prazo da Operação', style: 'tableCellLabel' },
                                         { text: `${prazoC} meses`, style: 'tableCellC' },
                                         { text: `${prazoF} meses`, style: 'tableCellF' },
@@ -1038,9 +1056,21 @@
                                         { ...tagRes(cetC, taxaJuros), style: ['tableCellR', tagRes(cetC, taxaJuros).style] }
                                     ],
                                     [
-                                        { text: 'CUSTO TOTAL FINAL', style: 'tableCellLabel', color: '#0f172a' },
-                                        { text: fmtMoeda(totalC), style: 'tableCellC', fontSize: 11 },
-                                        { text: fmtMoeda(totalF), style: 'tableCellF', fontSize: 11 },
+                                        { text: 'Total Desembolsado', style: 'tableCellLabel', color: '#0f172a' },
+                                        { 
+                                            text: [
+                                                { text: fmtMoeda(totalC), fontSize: 11 },
+                                                { text: `\n(Próprio: ${fmtMoeda(state._lance ? state._lance.lanceProprio : 0)} + Parc: ${fmtMoeda(totalC - (state._lance ? state._lance.lanceProprio : 0))})`, fontSize: 8, color: '#475569', bold: false }
+                                            ],
+                                            style: 'tableCellC'
+                                        },
+                                        { 
+                                            text: [
+                                                { text: fmtMoeda(totalF), fontSize: 11 },
+                                                { text: `\n(Entrada: ${fmtMoeda(state._lance ? state._lance.lanceProprio : 0)} + Parc: ${fmtMoeda(totalF - (state._lance ? state._lance.lanceProprio : 0))})`, fontSize: 8, color: '#475569', bold: false }
+                                            ],
+                                            style: 'tableCellF'
+                                        },
                                         { ...tagRes(totalC, totalF), style: ['tableCellR', tagRes(totalC, totalF).style], fontSize: 10 }
                                     ]
                                 ]
@@ -1087,8 +1117,8 @@
                                 widths: ['*', 'auto'],
                                 body: [
                                     [
-                                        { text: 'Crédito Total (Carta):', style: 'soloLabel' },
-                                        { text: fmtMoeda(valorBem), style: 'soloVal' }
+                                        { text: 'Crédito Total (Carta + Próprio):', style: 'soloLabel' },
+                                        { text: fmtMoeda((valorBem - (state._lance ? state._lance.lanceProprio : 0) - (state._lance ? state._lance.lanceEmbutido : 0)) + (state._lance ? state._lance.lanceProprio : 0)), style: 'soloVal' }
                                     ],
                                     [
                                         { text: 'Lance Próprio:', style: 'soloLabel' },
@@ -1116,7 +1146,13 @@
                                     ],
                                     [
                                         { text: 'Custo Total da Operação:', style: 'soloTotal' },
-                                        { text: fmtMoeda(totalC), style: 'soloTotal', alignment: 'right' }
+                                        { 
+                                            text: [
+                                                { text: fmtMoeda(totalC) },
+                                                { text: `\n(${fmtMoeda(state._lance ? state._lance.lanceProprio : 0)} Próprio + ${fmtMoeda(totalC - (state._lance ? state._lance.lanceProprio : 0))} Parcelas)`, fontSize: 9, color: '#cbd5e1', bold: false }
+                                            ],
+                                            style: 'soloTotal', alignment: 'right' 
+                                        }
                                     ]
                                 ]
                             },
