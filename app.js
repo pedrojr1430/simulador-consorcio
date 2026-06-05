@@ -1125,7 +1125,7 @@
 
                     const fullHtml = `
                         ${pdfCSS}
-                        <div class="pdf-wrapper" style="font-family: 'Inter', 'Segoe UI', sans-serif; max-width: 750px; max-height: 1050px; overflow: hidden; margin: 0 auto; background: #fff; padding: 20px;">
+                        <div class="pdf-wrapper" style="font-family: 'Inter', 'Segoe UI', sans-serif; width: 750px; height: 1050px; overflow: hidden; margin: 0 auto; background: #fff; padding: 20px; box-sizing: border-box;">
                             <div class="pdf-header">
                                 <div class="pdf-title-box">
                                     <h1>ConsórcioPro</h1>
@@ -1149,7 +1149,7 @@
                         margin:       [5, 0, 0, 0],
                         filename:     'Proposta_Comercial_ConsorcioPro.pdf',
                         image:        { type: 'jpeg', quality: 0.98 },
-                        html2canvas:  { scale: 2, useCORS: true },
+                        html2canvas:  { scale: 2, useCORS: true, windowWidth: 750 },
                         jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
                     };
 
