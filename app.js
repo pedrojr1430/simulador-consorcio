@@ -467,13 +467,13 @@
         }
 
         // 12. Sync inputs between pages
-        syncInputValue(elTaxaJuros, taxaJuros);
-        syncInputValue(elTaxaJurosMain, taxaJuros);
-        syncInputValue(elTaxaTR, state.taxaTR);
-        syncInputValue(elTaxaTRMain, state.taxaTR);
-        syncInputValue(elPrazoFin, prazoFinanciamento);
-        syncInputValue(elPrazoFinComp, prazoFinanciamento);
-        syncInputValue(elSliderPrazoFin, prazoFinanciamento);
+        syncInputValue(elTaxaJuros, taxaJuros || '');
+        syncInputValue(elTaxaJurosMain, taxaJuros || '');
+        syncInputValue(elTaxaTR, state.taxaTR || '');
+        syncInputValue(elTaxaTRMain, state.taxaTR || '');
+        syncInputValue(elPrazoFin, prazoFinanciamento || '');
+        syncInputValue(elPrazoFinComp, prazoFinanciamento || '');
+        syncInputValue(elSliderPrazoFin, prazoFinanciamento || 12);
         syncToggle('#toggle-amortizacao', sistemaAmortizacao);
         syncToggle('#toggle-amortizacao-main', sistemaAmortizacao);
     }

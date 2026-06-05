@@ -77,7 +77,7 @@
                             <label for="input-valor-carta">Valor da Carta de Crédito</label>
                             <div class="input-wrapper currency">
                                 <span class="input-prefix">R$</span>
-                                <input type="text" id="taxa-juros" class="input-field" placeholder="0" data-type="percent">0,00" inputmode="decimal" autocomplete="off">
+                                <input type="text" id="input-valor-carta" value="" placeholder="0,00" inputmode="decimal" autocomplete="off">
                             </div>
                             <input type="range" id="slider-valor-carta" min="10000" max="1000000" step="10000" value="0" class="range-slider" style="margin-top: 10px;">
                         </div>
@@ -147,8 +147,8 @@
                         <div class="input-group">
                             <label for="input-lance-proprio">Lance com Recursos Próprios</label>
                             <div class="lance-mode-toggle" id="toggle-modo-lance-proprio">
-                                <button class="lance-mode-btn active" data-mode="pct">Percentual</button>
-                                <button class="lance-mode-btn" data-mode="valor">Valor Real</button>
+                                <button class="lance-mode-btn active" data-mode="pct">% da Carta</button>
+                                <button class="lance-mode-btn" data-mode="valor">R$ Valor</button>
                             </div>
                             <div class="input-wrapper currency" id="wrapper-lance-proprio">
                                 <span class="input-prefix" id="prefix-lance-proprio">%</span>
@@ -160,12 +160,12 @@
                         <div class="input-group">
                             <label for="input-lance-embutido">Lance Embutido (Descontado da carta)</label>
                             <div class="lance-mode-toggle" id="toggle-modo-lance-embutido">
-                                <button class="lance-mode-btn active" data-mode="pct">Percentual</button>
-                                <button class="lance-mode-btn" data-mode="valor">Valor Real</button>
+                                <button class="lance-mode-btn active" data-mode="pct">% da Carta</button>
+                                <button class="lance-mode-btn" data-mode="valor">R$ Valor</button>
                             </div>
                             <div class="input-wrapper currency" id="wrapper-lance-embutido">
                                 <span class="input-prefix" id="prefix-lance-embutido">%</span>
-                                    <input type="number" id="prazo-financiamento" class="input-field" placeholder="0"> placeholder="0" step="0.1" min="0" max="100" autocomplete="off">
+                                <input type="number" id="input-lance-embutido" value="" placeholder="0" step="0.1" min="0" max="100" autocomplete="off">
                             </div>
                             <div class="lance-percentage" id="pct-lance-embutido"></div>
                         </div>
