@@ -1005,7 +1005,7 @@
                     // TABELAS
                     if (isComparativo) {
                         const custoJurosF = state._finAtivo ? state._finAtivo.totalJuros : 0;
-                        const custoAdmC = state._lance ? (state._lance.totalAdmin + state._lance.totalReserva) : 0;
+                        const custoAdmC = state._lance ? state._lance.custoConsorcio : 0;
                         const cetC = state._lance ? state._lance.cetConsorcio : 0;
                         const diffTotal = totalF - totalC;
 
@@ -1076,7 +1076,7 @@
                                     ],
                                     [
                                         { text: 'Taxa Efetiva (CET)', style: 'tableCellLabel' },
-                                        { text: `${Calculator.formatarNumero(state.taxaAdmin || 0, 2)}% (TOTAL)`, style: 'tableCellC' },
+                                        { text: `${Calculator.formatarNumero(cetC, 2)}% (TOTAL)`, style: 'tableCellC' },
                                         { text: `${taxaJuros}% a.a.`, style: 'tableCellF' },
                                         { text: '-', style: ['tableCellR', 'tagNeutral'] }
                                     ],

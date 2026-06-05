@@ -117,7 +117,7 @@ const Calculator = (() => {
         const economiaParcela = basica.primeiraParcela - novaParcela;
         const economiaPrazo = prazo - novoPrazo;
 
-        const custoTotal = totalPago - cartaEfetiva;
+        const custoTotal = (totalPago + lanceProprio) - cartaEfetiva;
         const cetConsorcio = cartaEfetiva > 0 ? (custoTotal / cartaEfetiva) * 100 : 0;
 
         return {
