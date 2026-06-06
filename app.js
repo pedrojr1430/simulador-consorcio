@@ -501,16 +501,16 @@
     function getThemeColors() {
         const isDark = document.body.classList.contains('dark-mode');
         return {
-            text: isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.6)',
-            grid: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
-            tooltipBg: isDark ? 'rgba(15,23,50,0.9)' : 'rgba(255,255,255,0.95)',
+            text: isDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.6)',
+            grid: isDark ? 'rgba(0,243,255,0.15)' : 'rgba(0,0,0,0.06)',
+            tooltipBg: isDark ? 'rgba(5,5,8,0.95)' : 'rgba(255,255,255,0.95)',
             tooltipText: isDark ? '#fff' : '#000',
-            consorcio: '#3b82f6',
-            consorcioFill: isDark ? 'rgba(59, 130, 246, 0.2)' : 'rgba(59, 130, 246, 0.3)',
-            price: '#ef4444',
-            priceFill: isDark ? 'rgba(239, 68, 68, 0.15)' : 'rgba(239, 68, 68, 0.2)',
-            sac: '#f0b429',
-            sacFill: isDark ? 'rgba(240, 180, 41, 0.15)' : 'rgba(240, 180, 41, 0.2)'
+            consorcio: '#00f3ff',
+            consorcioFill: isDark ? 'rgba(0, 243, 255, 0.2)' : 'rgba(0, 243, 255, 0.3)',
+            price: '#ff3366',
+            priceFill: isDark ? 'rgba(255, 51, 102, 0.2)' : 'rgba(255, 51, 102, 0.3)',
+            sac: '#ffcc00',
+            sacFill: isDark ? 'rgba(255, 204, 0, 0.2)' : 'rgba(255, 204, 0, 0.3)'
         };
     }
 
@@ -555,18 +555,20 @@
                     {
                         label: 'Consórcio',
                         data: consorcioData,
-                        borderColor: '#10b981', 
-                        backgroundColor: '#10b981',
+                        borderColor: theme.consorcio, 
+                        backgroundColor: theme.consorcio,
                         borderWidth: 0,
                         borderRadius: 4,
                         barPercentage: 0.8,
-                        categoryPercentage: 0.9
+                        categoryPercentage: 0.9,
+                        // Adicionando glow no gráfico para o Neon Theme
+                        hoverBackgroundColor: '#ffffff'
                     },
                     {
                         label: 'Financ. (Price)',
                         data: priceData,
-                        borderColor: '#ef4444', 
-                        backgroundColor: '#ef4444',
+                        borderColor: theme.price, 
+                        backgroundColor: theme.price,
                         borderWidth: 0,
                         borderRadius: 4,
                         barPercentage: 0.8,
@@ -575,8 +577,8 @@
                     {
                         label: 'Financ. (SAC)',
                         data: sacData,
-                        borderColor: '#f59e0b', 
-                        backgroundColor: '#f59e0b',
+                        borderColor: theme.sac, 
+                        backgroundColor: theme.sac,
                         borderWidth: 0,
                         borderRadius: 4,
                         barPercentage: 0.8,
@@ -661,20 +663,21 @@
         const canvas = $(`#${canvasId}`);
         if (!canvas) return;
 
+        const theme = getThemeColors();
         let segments;
         if (type === 'consorcio') {
             const lance = state._lance || Calculator.calcularLance(state.valorCarta, state.taxaAdmin, state.fundoReserva, state.prazo, state.lanceProprio, state.lanceEmbutido, state.abatimento, state.taxaCorrecao);
             const amort = lance.cartaEfetiva;
             const admin = lance.totalAdmin;
             const reserva = lance.totalReserva;
-            const lanceVal = state.lanceProprio;
+            const lanceVal = lance.lanceProprio;
             const creditoLiquido = state.valorCarta - lance.lanceProprio - lance.lanceEmbutido;
             const juros = Math.max(0, lance.totalPago - creditoLiquido - admin - reserva);
             segments = [
-                { label: 'Amortização (Líquido)', value: Math.max(0, creditoLiquido), color: '#3b82f6' },
-                { label: 'Taxas e Admin', value: admin + reserva, color: '#10b981' },
-                { label: 'Juros / Correção', value: juros, color: '#ef4444' },
-                { label: 'Lance (Próprio)', value: lanceVal, color: '#f0b429' }
+                { label: 'Amortização (Líquido)', value: Math.max(0, creditoLiquido), color: theme.consorcio },
+                { label: 'Taxas e Admin', value: admin + reserva, color: '#ff00ff' },
+                { label: 'Juros / Correção', value: juros, color: theme.price },
+                { label: 'Lance (Próprio)', value: lanceVal, color: theme.sac }
             ];
             $('#donut-total-consorcio').textContent = Calculator.formatarMoeda(lance.totalPago + lanceVal);
         } else {
@@ -685,15 +688,14 @@
             const juros = finAtivo.totalJuros;
             const entrada = fin.entrada;
             segments = [
-                { label: 'Amortização', value: amort, color: '#3b82f6' },
-                { label: 'Taxas e Admin', value: 0, color: '#10b981' },
-                { label: 'Juros (Total)', value: juros, color: '#ef4444' }
+                { label: 'Amortização', value: amort, color: theme.consorcio },
+                { label: 'Taxas e Admin', value: 0, color: '#ff00ff' },
+                { label: 'Juros (Total)', value: juros, color: theme.price }
             ];
             $('#donut-total-financiamento').textContent = Calculator.formatarMoeda(finAtivo.totalPago - entrada);
         }
 
         const data = segments.filter(s => s.value > 0);
-        const theme = getThemeColors();
 
         if (chartInstances[canvasId]) {
             chartInstances[canvasId].destroy();
