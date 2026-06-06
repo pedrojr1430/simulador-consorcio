@@ -1032,7 +1032,13 @@
                                         { text: 'RESULTADO', style: 'tableHeaderLine' }
                                     ],
                                     [
-                                        { text: 'Crédito Contratado', style: 'tableCellLabel' },
+                                        { text: 'Valor da Carta Contratada', style: 'tableCellLabel' },
+                                        { text: fmtMoeda(state.valorCarta), style: 'tableCellC' },
+                                        { text: '-', style: 'tableCellF' },
+                                        { text: '-', style: ['tableCellR', 'tagNeutral'] }
+                                    ],
+                                    [
+                                        { text: 'Crédito Contratado (Líquido)', style: 'tableCellLabel' },
                                         { text: fmtMoeda(creditoLiquido), style: 'tableCellC' },
                                         { text: fmtMoeda(creditoLiquido), style: 'tableCellF' },
                                         { text: '= IGUAL', style: ['tableCellR', 'tagNeutral'] }
@@ -1062,7 +1068,7 @@
                                         { ...tagRes(prazoC, prazoF), style: ['tableCellR', tagRes(prazoC, prazoF).style] }
                                     ],
                                     [
-                                        { text: 'Parcela Mensal', style: 'tableCellLabel' },
+                                        { text: 'Parcela Inicial', style: 'tableCellLabel' },
                                         { text: fmtMoeda(parcelaC), style: 'tableCellC' },
                                         { text: fmtMoeda(parcelaF), style: 'tableCellF' },
                                         { ...tagRes(parcelaC, parcelaF), style: ['tableCellR', tagRes(parcelaC, parcelaF).style] }
@@ -1153,6 +1159,10 @@
                                         { text: fmtMoeda(state._lance ? state._lance.lanceEmbutido : 0), style: 'soloVal' }
                                     ],
                                     [
+                                        { text: 'Valor da Carta Contratada:', style: 'soloLabel' },
+                                        { text: fmtMoeda(state.valorCarta), style: 'soloVal' }
+                                    ],
+                                    [
                                         { text: 'Crédito Líquido Disponível:', style: 'soloLabel' },
                                         { text: fmtMoeda(creditoLiquido), style: 'soloVal', color: '#0e7490' }
                                     ],
@@ -1165,7 +1175,7 @@
                                         { text: `${state.taxaAdmin}% total`, style: 'soloVal' }
                                     ],
                                     [
-                                        { text: 'Parcela Mensal:', style: 'soloLabel' },
+                                        { text: 'Parcela Inicial:', style: 'soloLabel' },
                                         { text: fmtMoeda(parcelaC), style: 'soloVal' }
                                     ],
                                     [
