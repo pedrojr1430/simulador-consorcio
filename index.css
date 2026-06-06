@@ -341,7 +341,17 @@ body.dark-mode .icon-moon { display: none; }
     text-shadow: 0 0 15px var(--blue-glow);
 }
 .result-highlight.financiamento .result-value { background: linear-gradient(135deg, var(--red), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-shadow: 0 0 15px var(--red-glow); }
-.result-detail { font-size: 0.75rem; color: var(--text-muted); margin-top: var(--space-xs); }
+.result-detail { font-size: 0.82rem; color: var(--text-muted); opacity: 0.9; }
+
+.fin-disclaimer {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-style: italic;
+    margin-top: 12px;
+    line-height: 1.4;
+    text-align: center;
+    opacity: 0.8;
+}
 
 .lance-results { display: flex; flex-direction: column; gap: var(--space-sm); }
 .lance-results.pulse { animation: pulseAnim 0.3s ease; }
