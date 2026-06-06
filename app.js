@@ -545,7 +545,7 @@
 
         Chart.defaults.font.family = "'Inter', sans-serif";
 
-        const chartType = 'bar';
+        const chartType = 'line';
 
         chartInstances[canvasId] = new Chart(canvas, {
             type: chartType, 
@@ -556,33 +556,37 @@
                         label: 'Consórcio',
                         data: consorcioData,
                         borderColor: theme.consorcio, 
-                        backgroundColor: theme.consorcio,
-                        borderWidth: 0,
-                        borderRadius: 4,
-                        barPercentage: 0.8,
-                        categoryPercentage: 0.9,
-                        // Adicionando glow no gráfico para o Neon Theme
-                        hoverBackgroundColor: '#ffffff'
+                        backgroundColor: theme.consorcioFill,
+                        borderWidth: 3,
+                        tension: 0.4,
+                        fill: true,
+                        pointRadius: 0,
+                        pointHoverRadius: 6,
+                        pointHoverBackgroundColor: '#ffffff'
                     },
                     {
                         label: 'Financ. (Price)',
                         data: priceData,
                         borderColor: theme.price, 
-                        backgroundColor: theme.price,
-                        borderWidth: 0,
-                        borderRadius: 4,
-                        barPercentage: 0.8,
-                        categoryPercentage: 0.9
+                        backgroundColor: theme.priceFill,
+                        borderWidth: 3,
+                        tension: 0.4,
+                        fill: true,
+                        pointRadius: 0,
+                        pointHoverRadius: 6,
+                        pointHoverBackgroundColor: '#ffffff'
                     },
                     {
                         label: 'Financ. (SAC)',
                         data: sacData,
                         borderColor: theme.sac, 
-                        backgroundColor: theme.sac,
-                        borderWidth: 0,
-                        borderRadius: 4,
-                        barPercentage: 0.8,
-                        categoryPercentage: 0.9
+                        backgroundColor: theme.sacFill,
+                        borderWidth: 3,
+                        tension: 0.4,
+                        fill: true,
+                        pointRadius: 0,
+                        pointHoverRadius: 6,
+                        pointHoverBackgroundColor: '#ffffff'
                     }
                 ]
             },
